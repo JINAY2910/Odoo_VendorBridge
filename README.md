@@ -118,4 +118,4 @@ Feel free to open an issue or submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](file:///Users/jinayshah/Desktop/Work👀/STUDY/Projects/Odoo_VendorBridge/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
