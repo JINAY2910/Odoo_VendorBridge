@@ -57,7 +57,8 @@ RFQ.init({
   }
 }, {
   sequelize,
-  modelName: 'RFQ'
+  modelName: 'RFQ',
+  tableName: 'rfqs'
 });
 
 export default RFQ;

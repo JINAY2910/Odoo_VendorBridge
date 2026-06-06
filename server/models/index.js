@@ -1,12 +1,12 @@
 import User from './User.js';
 import Vendor from './vendor.js';
 import Product from './product.js';
+import RFQ from './rfq.js';
 import Quotation from './quotation.js';
 import PurchaseOrder from './purchaseOrder.js';
 import Invoice from './invoice.js';
 import Payment from './payment.js';
 import ApprovalLog from './approvalLog.js';
-import RFQ from './rfq.js';
 import ActivityLog from './ActivityLog.js';
 
 // Setup Associations
