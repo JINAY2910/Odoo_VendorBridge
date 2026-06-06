@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            background-color: #fff;
+            padding: 40px 50px;
+            font-size: 11px;
+            width: 100%;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0a1f44 0%, #2e75b6 100%);
+            position: relative;
+        }
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            top: 5px;
+            left: 5px;
+        }
+        .logo-text h1 {
+            font-weight: 800;
+            font-size: 16px;
+            color: #1a1a1a;
+            letter-spacing: 0.5px;
+        }
+        .logo-text p {
+            font-size: 9px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+        .invoice-title {
+            text-align: right;
+        }
+        .invoice-title h1 {
+            color: #2e75b6;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .separator-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .separator-line {
+            flex-grow: 1;
+            height: 2px;
+            background-color: #ccc;
+        }
+        .separator-line-blue {
+            width: 80px;
+            height: 2px;
+            background-color: #5599ff;
+        }
+        .website-text {
+            font-size: 9px;
+            color: #555;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+        .billing-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .billing-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .billing-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .billing-label {
+            color: #666;
+            margin-bottom: 2px;
+        }
+        .client-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+        .invoice-no-label {
+            font-weight: 700;
+            font-size: 12px;
+            color: #1a1a1a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th {
+            background-color: #2e75b6;
+            color: #fff;
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 10px;
+        }
+        th:nth-child(2) {
+            text-align: left;
+        }
+        td {
+            padding: 8px 10px;
+            text-align: center;
+            color: #444;
+        }
+        td:nth-child(2) {
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #d9e1f2;
+        }
+        tr:nth-child(odd) {
+            background-color: #fff;
+        }
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .totals-table {
+            width: 250px;
+        }
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+        }
+        .totals-row span:first-child {
+            color: #666;
+        }
+        .totals-row span:last-child {
+            font-weight: 600;
+            color: #444;
+        }
+        .grand-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .payment-method {
+            background-color: #2e75b6;
+            color: #fff;
+            padding: 8px 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+        .grand-total-box {
+            background-color: #2e75b6;
+            color: #fff;
+            padding: 8px 15px;
+            font-weight: 700;
+            width: 250px;
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+        }
+        .bank-details {
+            margin-bottom: 30px;
+            margin-top: 10px;
+        }
+        .bank-details p {
+            margin-bottom: 4px;
+            color: #444;
+        }
+        .thank-you {
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 15px;
+            width: 300px;
+        }
+        .footer-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        .terms {
+            width: 50%;
+        }
+        .terms h4 {
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+        .terms p {
+            color: #666;
+            line-height: 1.4;
+        }
+        .signature-box {
+            text-align: right;
+            width: 40%;
+        }
+        .signature-text {
+            font-family: 'Great Vibes', cursive;
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 0px;
+        }
+        .signature-line {
+            height: 1px;
+            background-color: #ccc;
+            margin-top: -5px;
+            margin-bottom: 5px;
+        }
+        .signature-name {
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .signature-title {
+            color: #666;
+            font-size: 10px;
+        }
+        .bottom-contact {
+            margin-top: 20px;
+            border-top: 2px solid #ccc;
+            position: relative;
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .bottom-blue-line {
+            position: absolute;
+            top: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background-color: #5599ff;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+        }
+        .contact-icon {
+            color: #5599ff;
+            font-size: 14px;
+        }
+        .icon-box {
+            border: 1px solid #5599ff;
+            border-radius: 5px;
+            padding: 3px 5px;
+            color: #5599ff;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <div style="display: flex; position: relative;">
+                <svg width="35" height="35" viewBox="0 0 100 100">
+                    <path d="M50 10 A40 40 0 0 0 10 50 A40 40 0 0 0 50 90 A40 40 0 0 1 30 50 A40 40 0 0 1 50 10" fill="#0a1f44" />
+                    <path d="M60 10 A40 40 0 0 1 100 50 A40 40 0 0 1 60 90 A40 40 0 0 0 80 50 A40 40 0 0 0 60 10" fill="#2e75b6" />
+                </svg>
+            </div>
+            <div class="logo-text">
+                <h1>MERN PROCUREMENT</h1>
+                <p>PROCUREMENT MANAGEMENT</p>
+            </div>
+        </div>
+        <div class="invoice-title">
+            <h1>INVOICE</h1>
+        </div>
+    </div>
+
+    <div class="separator-container">
+        <div class="separator-line-blue"></div>
+        <div class="separator-line"></div>
+        <div class="website-text">MERNPROCUREMENT.COM</div>
+    </div>
+
+    <% const data = (typeof invoice !== 'undefined' ? invoice : false) || (typeof doc !== 'undefined' ? doc : {}); %>
+    <div class="billing-info">
+        <div class="billing-left">
+            <div class="billing-label"><%= type === 'PO' ? 'To Vendor :' : 'Invoice to :' %></div>
+            <div class="client-name"><%= data.clientName || data.vendorId?.vendorName || '' %></div>
+            <div><%= data.clientPhone || data.vendorId?.contactDetails || '' %></div>
+            <div><%= data.clientEmail || data.vendorId?.email || '' %></div>
+            <div><%= data.clientAddress || data.vendorId?.address || '' %></div>
+        </div>
+        <div class="billing-right">
+            <div class="invoice-no-label">Document No : <%= data.invoiceNumber || data.poNumber || data.quotationNumber || '' %></div>
+            <div><%= data.date || (typeof date !== 'undefined' ? date : '') %></div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>NO</th>
+                <th>DESCRIPTION</th>
+                <th>QTY</th>
+                <th>PRICE</th>
+                <th>TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% (data.items || data.lineItems || []).forEach(function(item, index) { %>
+            <tr>
+                <td><%= index + 1 %></td>
+                <td><%= item.description || item.itemName %></td>
+                <td><%= item.qty || item.quantity %></td>
+                <td>₹<%= (item.price || item.unitPrice || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+                <td>₹<%= (item.total || ((item.qty || item.quantity|| 0) * (item.price || item.unitPrice || 0))).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+
+    <div class="totals-section">
+        <div class="totals-table">
+            <div class="totals-row">
+                <span>Sub Total :</span>
+                <span>₹<%= (data.subTotal !== undefined ? data.subTotal : data.subtotal || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+
+            </div>
+            <div class="totals-row">
+                <span>Tax <%= data.taxRate || 18 %>% :</span>
+                <span>₹<%= (data.taxAmount || data.tax || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="grand-total-row">
+        <div class="payment-method">PAYMENT METHOD :</div>
+        <div class="grand-total-box">
+            <span>GRAND TOTAL :</span>
+            <span>₹<%= (data.grandTotal || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></span>
+        </div>
+
+    </div>
+
+    <div class="bank-details">
+        <p>Bank Name : <%= data.bankName || 'Borcelle' %></p>
+        <p>Account Number : <%= data.accountNumber || '123-456-7890' %></p>
+    </div>
+
+    <div class="thank-you">
+        Thank you for business with us!
+    </div>
+
+    <div class="footer-section">
+        <div class="terms">
+            <h4>Term and Conditions :</h4>
+            <p>Please send payment within 30 days of receiving this invoice. There will be 10% interest charge per month on late invoice.</p>
+        </div>
+        <div class="signature-box">
+            <div class="signature-text">Henrietta Mitchell</div>
+            <div class="signature-line"></div>
+            <div class="signature-name">Henrietta Mitchell</div>
+            <div class="signature-title">Administrator</div>
+        </div>
+    </div>
+
+    <div class="bottom-contact">
+        <div class="bottom-blue-line"></div>
+        <div class="contact-item">
+            <div class="icon-box">📞</div>
+            <span>123-456-7890</span>
+        </div>
+        <div class="contact-item">
+            <div class="icon-box">✉️</div>
+            <span>contact@mernprocurement.com</span>
+        </div>
+        <div class="contact-item">
+            <div class="icon-box">📍</div>
+            <span>123 Anywhere St., Any City</span>
+        </div>
+    </div>
+</body>
+</html>
