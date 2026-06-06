@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "powershell -Command \"Get-NetTCPConnection -LocalPort 3000, 24679 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Unique | Where-Object { $_ -gt 4 } | ForEach-Object { Stop-Process -Id $_ -Force }\" ; node server.js",
+    "dev": "node server.js",
     "build": "./render-build.sh",
     "vite-build": "vite build",
     "preview": "vite preview",
