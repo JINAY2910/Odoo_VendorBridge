@@ -1,33 +1,40 @@
-# 📦 MERN Procurement & Invoice Management System
+# 🌉 VendorBridge - Procurement & Vendor Management ERP
 
-A robust, full-stack Procurement ERP and Management System built on the MERN stack (MongoDB, Express, React, Node.js). This platform streamlines the business procurement workflow from Quotation generation through Purchase Orders, Invoicing, and Payment Tracking.
+VendorBridge is a unified, full-stack Procurement and Vendor Management ERP built on a modern SQL-based MERN-like stack (**MySQL**, **Sequelize ORM**, **Express.js**, **React**, and **Node.js**). This platform automates the entire organization-to-vendor lifecycle, from RFQ creation and quotation comparison to PO approvals, invoice dispatch, and payment tracking.
 
 ---
 
-## 🌟 Features
+## 🌟 Key Features
 
-- **Role-Based Access Control (RBAC):** Distinct dashboards and action permissions for **Admin**, **Manager**, and **User** roles.
-- **Quotation Workflow:** Create, review, approve, or reject vendor quotations with detailed line items and taxes.
-- **Purchase Orders (POs):** Automatically convert approved quotations directly into POs.
-- **Invoicing:** Link invoices to purchase orders with dynamic tracking of unit prices, quantities, and balances.
-- **Payment Processing:** Integrated payment entry system that mathematically controls the remaining balance and strictly blocks over-payments.
-- **PDF Generation:** Automated, premium-styled, dynamic PDF downloads for invoices and purchase orders via Puppeteer & EJS templates.
-- **Dynamic Dashboards:** Real-time visibility into Pending Approvals, Pending Payments, and Monthly Spend metrics dynamically fetched via the backend API.
+- **Role-Based Access Control (RBAC):** Distinct dashboards and action permissions for **Admin**, **Manager / Approver**, **Procurement Officer**, and **Vendor** roles.
+- **Upgraded Dashboards:** Real-time visibility into metrics, spending category distribution (IT, Manufacturing, Services, Logistics), and interactive filters:
+  - **Currency Switcher:** Switch on the fly between **INR (₹)** and **USD ($)** with automated conversions.
+  - **Timeframe Selector:** Dynamically group payments by **Weekly**, **Monthly**, **Yearly**, or **All** periods.
+  - **Searchable Activity Logs:** Central timeline displaying recent audited events with a search filter.
+- **Vendor Portal:** Vendors log in and are redirected to a dedicated `/vendor-portal` to view active RFQs and submit/edit bids.
+- **Quotation Comparison:** Side-by-side bid reviews with automatic lowest price highlighting, rating indicators, and sorting options.
+- **E2E Procurement Workflow:** Automatic Purchase Order (PO) creation upon Quotation approval, manager PO approvals, invoice generation, and balance tracking.
+- **PDF Generation & Email Dispatch:** Dynamic PDF document creation using Puppeteer & EJS templates. Invoices can be downloaded locally, printed, or emailed directly via SMTP/Nodemailer.
+- **Reports & Analytics:** Spending analytics, top vendors charts, and exportable summary reports in CSV format.
 
 ---
 
 ## 🛠 Tech Stack
 
 ### Frontend
-- **Framework:** [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Framework:** [React 19](https://react.dev/) + [Vite 6](https://vite.dev/)
+- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Charts:** [Recharts](https://recharts.org/)
 - **Icons:** [Lucide React](https://lucide.dev/)
-- **Routing:** [React Router](https://reactrouter.com/)
+- **Routing:** [React Router 7](https://reactrouter.com/)
 
 ### Backend
-- **Server:** [Node.js](https://nodejs.org/) & [Express.js](https://expressjs.com/)
-- **Database:** [MongoDB](https://www.mongodb.com/) & [Mongoose](https://mongoosejs.com/)
-- **PDF Generation:** [Puppeteer](https://pptr.dev/) & [EJS](https://ejs.co/)
+- **Runtime:** [Node.js](https://nodejs.org/)
+- **Server Framework:** [Express.js](https://expressjs.com/)
+- **ORM:** [Sequelize v6](https://sequelize.org/)
+- **Database:** [MySQL](https://www.mysql.com/)
+- **Mailer:** [Nodemailer](https://nodemailer.com/)
+- **PDF Compiler:** [Puppeteer](https://pptr.dev/) & [EJS Templates](https://ejs.co/)
 
 ---
 
@@ -35,38 +42,50 @@ A robust, full-stack Procurement ERP and Management System built on the MERN sta
 
 ### Prerequisites
 Make sure you have the following installed:
-- Node.js (v16+ recommended)
-- MongoDB (running locally or a cloud Atlas URI)
+- Node.js (v18+ recommended)
+- MySQL server (v8+)
 
 ### Installation
 
 1. **Clone the repository:**
    ```bash
    git clone <your-repository-url>
-   cd <project-directory>
+   cd Odoo_VendorBridge
    ```
 
-2. **Install dependencies:**
-   Since the backend and frontend are unified in this repository, simply run:
+2. **Install unified dependencies:**
+   The project is configured to run the backend server and frontend Vite builder concurrently.
    ```bash
    npm install
    ```
 
 3. **Set up Environment Variables:**
-   Create a `.env` file in the root directory and add your configuration credentials:
+   Create a `.env` file in the root directory and configure your credentials:
    ```env
    PORT=3000
-   MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret_key
    NODE_ENV=development
+   
+   # MySQL Database Connection
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=your_mysql_password
+   DB_NAME=vendorbridge_db
+   
+   # SMTP Email Settings (Nodemailer)
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASS=your_app_password
    ```
 
-4. **Start the Development Server:**
-   This project uses Vite middleware to serve both the React app and Express API concurrently.
+4. **Start the Development Servers:**
+   Boot up both the Express API and the Vite live reload environment concurrently:
    ```bash
    npm run dev
    ```
-   *The application will boot up at `http://localhost:3000`.*
+   The application will be served at `http://localhost:3000`.
 
 ---
 
@@ -74,35 +93,28 @@ Make sure you have the following installed:
 
 ```text
 ├── server/
-│   ├── config/         # Database configurations
-│   ├── controllers/    # API Request Handlers (Auth, PDF, Payments, etc.)
-│   ├── middleware/     # JWT Auth guards and protection
-│   ├── models/         # Mongoose Schemas (User, Invoice, Quotation, Payment)
-│   ├── routes/         # Express routing configurations
-│   └── templates/      # EJS templates for PDF generation
+│   ├── config/         # Sequelize and DB configurations
+│   ├── controllers/    # API Controllers (Auth, RFQs, POs, Payments, Reports, etc.)
+│   ├── middleware/     # JWT Auth guards and permissions protection
+│   ├── models/         # Sequelize Models (User, Vendor, RFQ, PurchaseOrder, Payment)
+│   ├── routes/         # Express Router configurations
+│   └── templates/      # EJS templates for invoice & document compiling
 ├── src/
-│   ├── components/     # Reusable React components (Layouts, Modals)
-│   ├── context/        # React Context wrappers (AuthContext)
-│   └── pages/          # Application views (Dashboard, Invoices, Login)
-├── server.js           # Main Express server entry point
+│   ├── components/     # CustomSelect, Sidebar, Layouts and modals
+│   ├── context/        # AuthContext for session management
+│   ├── utils/          # Formatting helpers and blob downloading
+│   └── pages/          # Views (Dashboard, Vendors, RFQs, Approvals, Invoices)
+├── server.js           # Server starter and Vite middleware hook
 ├── package.json        
-└── vite.config.js      # Vite compilation configuration
+└── vite.config.js      # Vite project settings
 ```
-
----
-
-## 📜 Role Workflows
-
-- **User**: Can draft Quotations from specific Vendors and track their assigned metrics.
-- **Manager**: Responsible for reviewing "Pending Quotations" & "Pending POs" on their dashboard, where they can formally execute the *Approve*, *Reject*, or *Convert to PO* commands.
-- **Admin**: Views high-level aggregated data such as total system users, total monetary flow, and governs full access control over all entities.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! 
-Feel free to check the issues page or submit a Pull Request.
+Contributions, issues, and feature requests are welcome!
+Feel free to open an issue or submit a Pull Request.
 
 ## 📄 License
 
