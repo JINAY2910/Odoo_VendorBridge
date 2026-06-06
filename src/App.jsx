@@ -8,6 +8,7 @@ import { Layout, ProtectedRoute } from './components/Layout.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Vendors from './pages/Vendors.jsx';
+import RFQs from './pages/RFQs.jsx';
 import Quotations from './pages/Quotations.jsx';
 import PurchaseOrders from './pages/PurchaseOrders.jsx';
 import PODetail from './pages/PODetail.jsx';
@@ -37,6 +38,7 @@ export default function App() {
               <Route element={<Layout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/vendors" element={<Vendors />} />
+                <Route path="/rfqs" element={<RFQs />} />
                 <Route path="/quotations" element={<Quotations />} />
                 <Route path="/pos" element={<PurchaseOrders />} />
                 <Route path="/pos/:id" element={<PODetail />} />

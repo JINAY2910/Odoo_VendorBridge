@@ -6,6 +6,7 @@ import PurchaseOrder from './purchaseOrder.js';
 import Invoice from './invoice.js';
 import Payment from './payment.js';
 import ApprovalLog from './approvalLog.js';
+import RFQ from './rfq.js';
 
 // Setup Associations
 
@@ -15,7 +16,11 @@ Vendor.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 // Product associations
 Product.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 
+// RFQ associations
+RFQ.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
+
 // Quotation associations
+Quotation.belongsTo(RFQ, { as: 'rfq', foreignKey: 'rfqId' });
 Quotation.belongsTo(Vendor, { as: 'vendor', foreignKey: 'vendorId' });
 Quotation.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 Quotation.belongsTo(User, { as: 'approver', foreignKey: 'approvedBy' });
@@ -46,5 +51,6 @@ export {
   PurchaseOrder,
   Invoice,
   Payment,
-  ApprovalLog
+  ApprovalLog,
+  RFQ
 };
