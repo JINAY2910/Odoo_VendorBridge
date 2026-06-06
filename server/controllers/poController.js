@@ -65,7 +65,7 @@ export const getPOById = async (req, res) => {
   try {
     const po = await PurchaseOrder.findByPk(req.params.id, {
       include: [
-        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'contactDetails', 'address', 'gstNumber'] },
+        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'email', 'phone', 'address', 'gstNumber'] },
         { model: Quotation, as: 'quotation', attributes: ['quotationNumber'] },
         { model: User, as: 'creator', attributes: ['name'] },
         { model: User, as: 'approver', attributes: ['name'] }

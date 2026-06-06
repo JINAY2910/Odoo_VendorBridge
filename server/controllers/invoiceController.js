@@ -91,7 +91,7 @@ export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findByPk(req.params.id, {
       include: [
-        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'contactDetails', 'address', 'gstNumber'] },
+        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'email', 'phone', 'address', 'gstNumber'] },
         { model: PurchaseOrder, as: 'po', attributes: ['poNumber', 'grandTotal'] },
         { model: User, as: 'creator', attributes: ['name'] }
       ]

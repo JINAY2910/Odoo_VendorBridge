@@ -79,7 +79,7 @@ export const getQuotationById = async (req, res) => {
   try {
     const quotation = await Quotation.findByPk(req.params.id, {
       include: [
-        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'contactDetails', 'address', 'gstNumber'] },
+        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'email', 'phone', 'address', 'gstNumber'] },
         { model: User, as: 'creator', attributes: ['name'] },
         { model: User, as: 'approver', attributes: ['name'] }
       ]

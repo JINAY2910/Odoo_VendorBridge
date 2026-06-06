@@ -15,7 +15,7 @@ export const downloadInvoicePDF = async (req, res) => {
     const filename = `invoice-${invoice.invoiceNumber || id}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(pdfBuffer);
+    res.send(Buffer.from(pdfBuffer));
   } catch (error) {
     console.error("PDF Generation Error:", error);
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
@@ -92,14 +92,14 @@ export const generatePDF = async (req, res) => {
       headless: true
     });
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
     
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
 
     const filename = `${type.toUpperCase()}-${data.invoiceNumber || data.poNumber || data.quotationNumber || id}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(pdfBuffer);
+    res.send(Buffer.from(pdfBuffer));
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
   } finally {
@@ -150,13 +150,13 @@ export const generateInvoicePDF = async (req, res) => {
       headless: true
     });
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
     
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="invoice.pdf"');
-    res.send(pdfBuffer);
+    res.send(Buffer.from(pdfBuffer));
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
   } finally {
