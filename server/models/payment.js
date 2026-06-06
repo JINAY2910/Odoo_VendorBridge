@@ -1,13 +1,57 @@
-import mongoose, { Schema } from 'mongoose';
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../config/sequelize.js';
 
-// Payment Model
-const PaymentSchema = new Schema({
-    invoiceId: { type: Schema.Types.ObjectId, ref: 'Invoice', required: true },
-    amountPaid: { type: Number, required: true },
-    paymentDate: { type: Date, default: Date.now },
-    paymentMethod: { type: String, required: true },
-    remarks: { type: String },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }
-}, { timestamps: true });
+class Payment extends Model {
+  toJSON() {
+    const values = { ...this.get() };
+    if (values.id) {
+      values._id = values.id;
+    }
+    if (values.invoice) {
+      values.invoiceId = values.invoice;
+      delete values.invoice;
+    }
+    if (values.creator) {
+      values.createdBy = values.creator;
+      delete values.creator;
+    }
+    return values;
+  }
+}
 
-export default mongoose.model("Payment", PaymentSchema);
+Payment.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  invoiceId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  amountPaid: {
+    type: DataTypes.DOUBLE,
+    allowNull: false
+  },
+  paymentDate: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW
+  },
+  paymentMethod: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  remarks: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  createdBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  }
+}, {
+  sequelize,
+  modelName: 'Payment'
+});
+
+export default Payment;

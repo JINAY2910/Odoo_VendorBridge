@@ -1,13 +1,57 @@
-import mongoose, { Schema } from 'mongoose';
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../config/sequelize.js';
 
-const ProductSchema = new Schema({
-    name: { type: String, required: true },
-    code: { type: String, required: true }, // HSN or SAC code
-    codeType: { type: String, enum: ['HSN', 'SAC'], required: true },
-    gstRate: { type: Number, required: true },
-    defaultPrice: { type: Number, default: 0 },
-    isActive: { type: Boolean, default: true },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }
-}, { timestamps: true });
+class Product extends Model {
+  toJSON() {
+    const values = { ...this.get() };
+    if (values.id) {
+      values._id = values.id;
+    }
+    if (values.creator) {
+      values.createdBy = values.creator;
+      delete values.creator;
+    }
+    return values;
+  }
+}
 
-export default mongoose.model("Product", ProductSchema);
+Product.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  code: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  codeType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  gstRate: {
+    type: DataTypes.DOUBLE,
+    allowNull: false
+  },
+  defaultPrice: {
+    type: DataTypes.DOUBLE,
+    defaultValue: 0
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  createdBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  }
+}, {
+  sequelize,
+  modelName: 'Product'
+});
+
+export default Product;

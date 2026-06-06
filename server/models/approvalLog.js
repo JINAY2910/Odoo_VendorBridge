@@ -1,12 +1,49 @@
-import mongoose, { Schema } from 'mongoose';
+import { Model, DataTypes } from 'sequelize';
+import sequelize from '../config/sequelize.js';
 
-// ApprovalLog Model
-const ApprovalLogSchema = new Schema({
-    entityType: { type: String, enum: ['Quotation', 'PurchaseOrder'], required: true },
-    entityId: { type: Schema.Types.ObjectId, required: true },
-    action: { type: String, enum: ['Approve', 'Reject'], required: true },
-    remarks: { type: String },
-    performedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }
-}, { timestamps: true });
+class ApprovalLog extends Model {
+  toJSON() {
+    const values = { ...this.get() };
+    if (values.id) {
+      values._id = values.id;
+    }
+    if (values.performer) {
+      values.performedBy = values.performer;
+      delete values.performer;
+    }
+    return values;
+  }
+}
 
-export default mongoose.model("ApprovalLog", ApprovalLogSchema);
+ApprovalLog.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  entityType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  entityId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  action: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  remarks: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  performedBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  }
+}, {
+  sequelize,
+  modelName: 'ApprovalLog'
+});
+
+export default ApprovalLog;

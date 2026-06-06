@@ -1,18 +1,17 @@
-
+import { fn, col } from 'sequelize';
 import { Quotation, PurchaseOrder, Invoice, Vendor, Payment } from '../models/index.js';
 import { UserRole } from '../models/User.js';
-import mongoose from 'mongoose';
 
 export const getGeneralStats = async (req, res) => {
   try {
     const query = req.user.role === UserRole.USER ? { createdBy: req.user._id } : {};
     const [quotations, pos, invoices, vendors, payments] = await Promise.all([
-    Quotation.find(query),
-    PurchaseOrder.find(query),
-    Invoice.find(query),
-    Vendor.find(),
-    Payment.find(req.user.role === UserRole.USER ? { createdBy: req.user._id } : {})]
-    );
+      Quotation.findAll({ where: query }),
+      PurchaseOrder.findAll({ where: query }),
+      Invoice.findAll({ where: query }),
+      Vendor.findAll(),
+      Payment.findAll({ where: req.user.role === UserRole.USER ? { createdBy: req.user._id } : {} })
+    ]);
 
     const totalQuotationValue = quotations.reduce((sum, q) => sum + q.grandTotal, 0);
     const totalPOValue = pos.reduce((sum, p) => sum + p.grandTotal, 0);
@@ -38,24 +37,24 @@ export const getGeneralStats = async (req, res) => {
 
 export const getMonthlyTrends = async (req, res) => {
   try {
-    const matchStage = req.user.role === UserRole.USER ? { $match: { createdBy: new mongoose.Types.ObjectId(req.user._id) } } : { $match: {} };
-    const trends = await PurchaseOrder.aggregate([
-    matchStage,
-    {
-      $group: {
-        _id: { $month: "$createdAt" },
-        totalValue: { $sum: "$grandTotal" },
-        count: { $sum: 1 }
-      }
-    },
-    { $sort: { "_id": 1 } }]
-    );
+    const query = req.user.role === UserRole.USER ? { createdBy: req.user._id } : {};
+    const trends = await PurchaseOrder.findAll({
+      attributes: [
+        [fn('MONTH', col('createdAt')), 'monthNum'],
+        [fn('SUM', col('grandTotal')), 'totalValue'],
+        [fn('COUNT', col('id')), 'count']
+      ],
+      where: query,
+      group: [fn('MONTH', col('createdAt'))],
+      order: [[fn('MONTH', col('createdAt')), 'ASC']],
+      raw: true
+    });
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const formattedTrends = trends.map((t) => ({
-      month: monthNames[t._id - 1],
-      value: t.totalValue,
-      count: t.count
+      month: monthNames[parseInt(t.monthNum, 10) - 1] || 'Unknown',
+      value: parseFloat(t.totalValue || 0),
+      count: parseInt(t.count || 0, 10)
     }));
 
     res.json(formattedTrends);
@@ -66,35 +65,31 @@ export const getMonthlyTrends = async (req, res) => {
 
 export const getVendorSpending = async (req, res) => {
   try {
-    const matchStage = req.user.role === UserRole.USER ? { $match: { createdBy: new mongoose.Types.ObjectId(req.user._id) } } : { $match: {} };
-    const spending = await PurchaseOrder.aggregate([
-    matchStage,
-    {
-      $group: {
-        _id: "$vendorId",
-        totalSpent: { $sum: "$grandTotal" }
-      }
-    },
-    {
-      $lookup: {
-        from: "vendors",
-        localField: "_id",
-        foreignField: "_id",
-        as: "vendor"
-      }
-    },
-    { $unwind: "$vendor" },
-    {
-      $project: {
-        name: "$vendor.vendorName",
-        value: "$totalSpent"
-      }
-    },
-    { $sort: { value: -1 } },
-    { $limit: 5 }]
-    );
+    const query = req.user.role === UserRole.USER ? { createdBy: req.user._id } : {};
+    const spending = await PurchaseOrder.findAll({
+      attributes: [
+        'vendorId',
+        [fn('SUM', col('grandTotal')), 'totalSpent']
+      ],
+      where: query,
+      include: [
+        {
+          model: Vendor,
+          as: 'vendor',
+          attributes: ['vendorName']
+        }
+      ],
+      group: ['vendorId', 'vendor.id'],
+      order: [[fn('SUM', col('grandTotal')), 'DESC']],
+      limit: 5
+    });
 
-    res.json(spending);
+    const formattedSpending = spending.map((s) => ({
+      name: s.vendor ? s.vendor.vendorName : 'Unknown Vendor',
+      value: parseFloat(s.getDataValue('totalSpent') || 0)
+    }));
+
+    res.json(formattedSpending);
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
   }

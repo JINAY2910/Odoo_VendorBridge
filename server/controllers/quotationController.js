@@ -1,17 +1,16 @@
-
-import { Quotation, PurchaseOrder, ApprovalLog } from '../models/index.js';
+import { Quotation, PurchaseOrder, ApprovalLog, Vendor, User } from '../models/index.js';
 import { UserRole } from '../models/User.js';
 
 // Auto-generate quotation number (e.g., QUO-2026-0001)
 const generateQuotationNumber = async () => {
-  const count = await Quotation.countDocuments();
+  const count = await Quotation.count();
   const year = new Date().getFullYear();
   return `QUO-${year}-${(count + 1).toString().padStart(4, '0')}`;
 };
 
 // Auto-generate PO number (e.g., PO-2026-0001)
 const generatePONumber = async () => {
-  const count = await PurchaseOrder.countDocuments();
+  const count = await PurchaseOrder.count();
   const year = new Date().getFullYear();
   return `PO-${year}-${(count + 1).toString().padStart(4, '0')}`;
 };
@@ -56,10 +55,14 @@ export const createQuotation = async (req, res) => {
 export const getQuotations = async (req, res) => {
   try {
     const query = req.user.role === UserRole.USER ? { createdBy: req.user._id } : {};
-    const quotations = await Quotation.find(query).
-    populate('vendorId', 'vendorName').
-    populate('createdBy', 'name').
-    populate('approvedBy', 'name');
+    const quotations = await Quotation.findAll({
+      where: query,
+      include: [
+        { model: Vendor, as: 'vendor', attributes: ['vendorName'] },
+        { model: User, as: 'creator', attributes: ['name'] },
+        { model: User, as: 'approver', attributes: ['name'] }
+      ]
+    });
     res.json(quotations);
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
@@ -68,10 +71,13 @@ export const getQuotations = async (req, res) => {
 
 export const getQuotationById = async (req, res) => {
   try {
-    const quotation = await Quotation.findById(req.params.id).
-    populate('vendorId', 'vendorName contactDetails address gstNumber').
-    populate('createdBy', 'name').
-    populate('approvedBy', 'name');
+    const quotation = await Quotation.findByPk(req.params.id, {
+      include: [
+        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'contactDetails', 'address', 'gstNumber'] },
+        { model: User, as: 'creator', attributes: ['name'] },
+        { model: User, as: 'approver', attributes: ['name'] }
+      ]
+    });
     if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
     res.json(quotation);
   } catch (error) {
@@ -82,7 +88,7 @@ export const getQuotationById = async (req, res) => {
 export const approveRejectQuotation = async (req, res) => {
   try {
     const { action, remarks } = req.body; // action: 'Approve' or 'Reject'
-    const quotation = await Quotation.findById(req.params.id);
+    const quotation = await Quotation.findByPk(req.params.id);
 
     if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
     if (quotation.status !== 'Pending Approval') {
@@ -97,7 +103,7 @@ export const approveRejectQuotation = async (req, res) => {
     // Log approval action
     await ApprovalLog.create({
       entityType: 'Quotation',
-      entityId: quotation._id,
+      entityId: quotation.id,
       action,
       remarks,
       performedBy: req.user._id
@@ -111,7 +117,7 @@ export const approveRejectQuotation = async (req, res) => {
 
 export const convertToPO = async (req, res) => {
   try {
-    const quotation = await Quotation.findById(req.params.id);
+    const quotation = await Quotation.findByPk(req.params.id);
 
     if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
     if (quotation.status !== 'Approved') {
@@ -122,7 +128,7 @@ export const convertToPO = async (req, res) => {
 
     const po = await PurchaseOrder.create({
       poNumber,
-      quotationId: quotation._id,
+      quotationId: quotation.id,
       vendorId: quotation.vendorId,
       lineItems: quotation.lineItems,
       subtotal: quotation.subtotal,

@@ -1,13 +1,14 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import { User } from '../models/index.js';
 
 // AUTH BYPASSED — inject mock admin user, skip token verification
 export const protect = async (req, res, next) => {
   // Attach a mock admin user so all downstream controllers work
   req.user = {
-    _id: 'mock-admin-id',
-    name: 'Admin User',
-    email: 'admin@procurement.com',
+    _id: 1,
+    id: 1,
+    name: 'System Admin',
+    email: 'admin@company.com',
     role: 'ADMIN'
   };
   return next();
@@ -18,7 +19,7 @@ export const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'my_super_secret_jwt_key');
-      req.user = await User.findById(decoded.id).select('-password');
+      req.user = await User.findByPk(decoded.id);
       if (!req.user) {
         return res.status(401).json({ message: 'Not authorized, user not found' });
       }

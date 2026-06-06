@@ -1,23 +1,29 @@
 import puppeteer from 'puppeteer';
 import ejs from 'ejs';
 import path from 'path';
-import { Quotation, PurchaseOrder, Invoice, Payment } from '../models/index.js';
+import { Quotation, PurchaseOrder, Invoice, Payment, Vendor, User } from '../models/index.js';
 
 export const downloadInvoicePDF = async (req, res) => {
   let browser;
   try {
     const id = req.params.id;
-    const invoiceData = await Invoice.findById(id).populate('poId').populate('createdBy', 'name').populate('vendorId');
+    const invoiceData = await Invoice.findByPk(id, {
+      include: [
+        { model: PurchaseOrder, as: 'po' },
+        { model: User, as: 'creator', attributes: ['name'] },
+        { model: Vendor, as: 'vendor' }
+      ]
+    });
     
     if (!invoiceData) {
       return res.status(404).json({ message: 'Document not found' });
     }
 
-    const payments = await Payment.find({ invoiceId: id });
+    const payments = await Payment.findAll({ where: { invoiceId: id } });
     const totalPaid = payments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
     const amountDue = invoiceData.grandTotal - totalPaid;
     
-    const data = invoiceData.toObject();
+    const data = invoiceData.toJSON();
     const templatePath = path.join(process.cwd(), 'server/templates/invoice.ejs');
     const html = await ejs.renderFile(templatePath, {
       doc: data,
@@ -64,16 +70,33 @@ export const generatePDF = async (req, res) => {
     let data;
 
     if (type === 'quotation') {
-      data = await Quotation.findById(id).populate('vendorId').populate('createdBy', 'name');
+      const dbQuo = await Quotation.findByPk(id, {
+        include: [
+          { model: Vendor, as: 'vendor' },
+          { model: User, as: 'creator', attributes: ['name'] }
+        ]
+      });
+      if (dbQuo) data = dbQuo.toJSON();
     } else if (type === 'po') {
-      data = await PurchaseOrder.findById(id).populate('vendorId').populate('createdBy', 'name');
+      const dbPo = await PurchaseOrder.findByPk(id, {
+        include: [
+          { model: Vendor, as: 'vendor' },
+          { model: User, as: 'creator', attributes: ['name'] }
+        ]
+      });
+      if (dbPo) data = dbPo.toJSON();
     } else if (type === 'invoice') {
-      const invoiceData = await Invoice.findById(id).populate('vendorId').populate('createdBy', 'name');
-      if (invoiceData) {
-        const payments = await Payment.find({ invoiceId: id });
+      const dbInv = await Invoice.findByPk(id, {
+        include: [
+          { model: Vendor, as: 'vendor' },
+          { model: User, as: 'creator', attributes: ['name'] }
+        ]
+      });
+      if (dbInv) {
+        const payments = await Payment.findAll({ where: { invoiceId: id } });
         const totalPaid = payments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
-        const balanceDue = invoiceData.grandTotal - totalPaid;
-        data = invoiceData.toObject();
+        const balanceDue = dbInv.grandTotal - totalPaid;
+        data = dbInv.toJSON();
         data.totalPaid = totalPaid;
         data.balanceDue = balanceDue;
       }
@@ -85,7 +108,7 @@ export const generatePDF = async (req, res) => {
     let amountDue = data.grandTotal || 0;
 
     if (type === 'invoice') {
-      const payments = await Payment.find({ invoiceId: id });
+      const payments = await Payment.findAll({ where: { invoiceId: id } });
       totalPaid = payments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
       amountDue = data.grandTotal - totalPaid;
     }
