@@ -74,7 +74,7 @@ const ActivityLogs = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Activity className="text-blue-600" size={28} /> Activity Logs
           </h1>
           <p className="text-slate-500 text-sm mt-1">Real-time system audit logs tracking document flows, approvals, and actions</p>

@@ -29,11 +29,12 @@ const Dashboard = () => {
         return { data: [] };
       });
 
-      const [quo, inv, pos, pay] = await Promise.all([
+      const [quo, inv, pos, pay, logs] = await Promise.all([
         safeGet('/quotations'),
         safeGet('/invoices'),
         safeGet('/pos'),
-        safeGet('/payments')
+        safeGet('/payments'),
+        safeGet('/activity-logs?limit=5')
       ]);
 
       const pendingPOs = pos.data.filter((p) => p.status === 'Pending Approval').length;
@@ -60,7 +61,7 @@ const Dashboard = () => {
         totalPoValue,
         pendingPaymentAmount,
         chartData,
-        recentTransactions
+        recentActivity: logs.data
       });
     } catch (error) {
       console.error('Error fetching stats', error);
@@ -215,7 +216,7 @@ const Dashboard = () => {
         {/* Transactions Table */}
         <div className="lg:col-span-2 bg-white rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/60">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-display font-medium text-slate-900 text-[17px]">Transactions History</h3>
+            <h3 className="font-display font-medium text-slate-900 text-[17px]">Recent Activity Logs</h3>
             <div className="relative">
               <input 
                 type="text" 
@@ -230,30 +231,26 @@ const Dashboard = () => {
             <table className="w-full text-left text-sm">
               <thead className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold border-b border-slate-100/80">
                 <tr>
-                  <th className="pb-4 font-semibold">Description</th>
+                  <th className="pb-4 font-semibold">Action</th>
+                  <th className="pb-4 font-semibold">Entity</th>
                   <th className="pb-4 font-semibold">Date</th>
-                  <th className="pb-4 font-semibold">Method</th>
-                  <th className="pb-4 font-semibold text-right">Amount</th>
-                  <th className="pb-4 font-semibold text-center">Status</th>
+                  <th className="pb-4 font-semibold text-right">User</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {stats.recentTransactions?.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                {stats.recentActivity?.map((t) => (
+                  <tr key={t.id || t._id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 flex items-center font-medium text-slate-900">
-                      <div className={`w-8 h-8 rounded-lg mr-3 flex items-center justify-center ${t.amount > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
-                        {t.amount > 0 ? <ArrowRight size={14} /> : <ShoppingCart size={14} />}
+                      <div className={`w-8 h-8 rounded-lg mr-3 flex items-center justify-center bg-blue-100 text-blue-600`}>
+                        <FileText size={14} />
                       </div>
-                      {t.desc}
+                      {t.action}
                     </td>
-                    <td className="py-4 text-slate-500">{t.date}</td>
-                    <td className="py-4 text-slate-500">{t.method}</td>
-                    <td className={`py-4 text-right font-display font-medium ${t.amount > 0 ? 'text-emerald-500' : 'text-slate-900'}`}>
-                      {t.amount > 0 ? '+' : ''}{formatCurrency(t.amount)}
-                    </td>
-                    <td className="py-4 text-center">
-                      <span className="bg-emerald-50/50 text-emerald-600 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-bold border border-emerald-100/50">
-                        {t.status}
+                    <td className="py-4 text-slate-500 font-medium">{t.entity} #{t.entityId}</td>
+                    <td className="py-4 text-slate-500">{new Date(t.createdAt).toLocaleDateString()}</td>
+                    <td className="py-4 text-right">
+                      <span className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-bold">
+                        {t.performer?.name || 'System'}
                       </span>
                     </td>
                   </tr>

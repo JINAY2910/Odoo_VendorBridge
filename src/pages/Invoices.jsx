@@ -152,7 +152,7 @@ const Invoices = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900">Invoices</h1>
+        <h1 className="text-3xl font-bold text-white">Invoices</h1>
         <div className="flex space-x-3">
           {user?.role === 'USER' &&
             <button

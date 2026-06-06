@@ -112,7 +112,7 @@ const QuotationComparison = () => {
                 {rfq?.status}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 mt-1">Compare Bids: {rfq?.title}</h1>
+            <h1 className="text-2xl font-bold text-white mt-1">Compare Bids: {rfq?.title}</h1>
           </div>
         </div>
 

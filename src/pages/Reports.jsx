@@ -79,7 +79,7 @@ const Reports = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <BarChart3 className="text-blue-600" size={28} /> Reports & Analytics
           </h1>
           <p className="text-slate-500 text-sm mt-1">Review system metrics, financial summaries, vendor performance, and exports</p>

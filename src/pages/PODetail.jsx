@@ -41,7 +41,7 @@ const PODetail = () => {
           <ArrowLeft size={24} />
         </button>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Purchase Order Detail</h1>
+          <h1 className="text-3xl font-bold text-white">Purchase Order Detail</h1>
           <p className="text-slate-500">View full details of {po.poNumber}</p>
         </div>
       </div>
