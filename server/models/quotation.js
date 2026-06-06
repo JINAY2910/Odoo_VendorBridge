@@ -77,6 +77,18 @@ Quotation.init({
   remarks: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  rfqId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  timeline: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   sequelize,

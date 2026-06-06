@@ -14,6 +14,10 @@ class User extends Model {
     return await bcrypt.compare(password, this.password);
   }
 
+  get _id() {
+    return this.id;
+  }
+
   toJSON() {
     const values = { ...this.get() };
     if (values.id) {
@@ -45,6 +49,10 @@ User.init({
   role: {
     type: DataTypes.STRING,
     defaultValue: UserRole.USER
+  },
+  vendorId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
 }, {
   sequelize,

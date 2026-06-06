@@ -1,4 +1,5 @@
 import { PurchaseOrder, ApprovalLog, Vendor, Quotation, User } from '../models/index.js';
+import { logActivity } from '../utils/activityLogger.js';
 
 // Auto-generate PO number (e.g., PO-2026-0001)
 const generatePONumber = async () => {
@@ -35,6 +36,8 @@ export const createPO = async (req, res) => {
       createdBy: req.user._id,
       status: 'Pending Approval'
     });
+
+    await logActivity('Create', 'PurchaseOrder', po.id, req.user._id);
 
     res.status(201).json(po);
   } catch (error) {

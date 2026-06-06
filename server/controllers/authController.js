@@ -9,7 +9,7 @@ const generateToken = (id) => {
 };
 
 export const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, vendorId } = req.body;
 
   try {
     const userExists = await User.findOne({ where: { email } });
@@ -22,7 +22,8 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password,
-      role: role || UserRole.USER
+      role: role || UserRole.USER,
+      vendorId: vendorId || null
     });
 
     if (user) {
@@ -32,6 +33,7 @@ export const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        vendorId: user.vendorId,
         token: generateToken(user.id.toString())
       });
     } else {
@@ -55,6 +57,7 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        vendorId: user.vendorId,
         token: generateToken(user.id.toString())
       });
     } else {

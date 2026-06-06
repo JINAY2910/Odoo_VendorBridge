@@ -1,4 +1,5 @@
 import { Vendor, User } from '../models/index.js';
+import { logActivity } from '../utils/activityLogger.js';
 
 export const createVendor = async (req, res) => {
   try {
@@ -13,6 +14,9 @@ export const createVendor = async (req, res) => {
       status: status || 'active',
       createdBy: req.user._id
     });
+
+    await logActivity('Create', 'Vendor', vendor.id, req.user._id);
+
     res.status(201).json(vendor);
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });

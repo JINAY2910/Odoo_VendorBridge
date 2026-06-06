@@ -2,64 +2,23 @@ import puppeteer from 'puppeteer';
 import ejs from 'ejs';
 import path from 'path';
 import { Quotation, PurchaseOrder, Invoice, Payment, Vendor, User } from '../models/index.js';
+import { generateInvoicePDFBuffer } from '../utils/pdfHelper.js';
 
 export const downloadInvoicePDF = async (req, res) => {
-  let browser;
   try {
     const id = req.params.id;
-    const invoiceData = await Invoice.findByPk(id, {
-      include: [
-        { model: PurchaseOrder, as: 'po' },
-        { model: User, as: 'creator', attributes: ['name'] },
-        { model: Vendor, as: 'vendor' }
-      ]
-    });
-    
-    if (!invoiceData) {
-      return res.status(404).json({ message: 'Document not found' });
+    const invoice = await Invoice.findByPk(id);
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
     }
-
-    const payments = await Payment.findAll({ where: { invoiceId: id } });
-    const totalPaid = payments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
-    const amountDue = invoiceData.grandTotal - totalPaid;
-    
-    const data = invoiceData.toJSON();
-    const templatePath = path.join(process.cwd(), 'server/templates/invoice.ejs');
-    const html = await ejs.renderFile(templatePath, {
-      doc: data,
-      type: 'INVOICE',
-      date: new Date(invoiceData.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
-      totalPaid,
-      amountDue
-    });
-
-    browser = await puppeteer.launch({
-      args: [
-        '--no-sandbox', 
-        '--disable-setuid-sandbox', 
-        '--disable-dev-shm-usage', 
-        '--disable-gpu'
-      ],
-      headless: true
-    });
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({ 
-      format: 'A4', 
-      printBackground: true,
-      margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
-    });
-    
-    const filename = `invoice-${data.invoiceNumber || id}.pdf`;
+    const pdfBuffer = await generateInvoicePDFBuffer(id);
+    const filename = `invoice-${invoice.invoiceNumber || id}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(pdfBuffer);
   } catch (error) {
     console.error("PDF Generation Error:", error);
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
-  } finally {
-    if (browser) await browser.close();
   }
 };
 

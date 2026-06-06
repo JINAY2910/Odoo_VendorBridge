@@ -12,6 +12,9 @@ export const ProtectedRoute = ({ roles }) => {
   if (!user) return <Navigate to="/login" replace />;
 
   if (roles && !roles.includes(user.role)) {
+    if (user.role === 'VENDOR') {
+      return <Navigate to="/vendor-portal" replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 

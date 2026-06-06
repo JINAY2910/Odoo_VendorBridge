@@ -18,7 +18,11 @@ const Login = () => {
       const { data } = await api.post('/auth/login', { email, password });
       login(data);
       toast.success(`Welcome back, ${data.name}!`);
-      navigate('/dashboard');
+      if (data.role === 'VENDOR') {
+        navigate('/vendor-portal');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
     } finally {

@@ -1,5 +1,6 @@
 import { Quotation, PurchaseOrder, ApprovalLog, Vendor, User } from '../models/index.js';
 import { UserRole } from '../models/User.js';
+import { logActivity } from '../utils/activityLogger.js';
 
 // Auto-generate quotation number (e.g., QUO-2026-0001)
 const generateQuotationNumber = async () => {
@@ -17,7 +18,7 @@ const generatePONumber = async () => {
 
 export const createQuotation = async (req, res) => {
   try {
-    const { vendorId, lineItems, validUntil } = req.body;
+    const { vendorId, lineItems, validUntil, rfqId, timeline, notes } = req.body;
 
     let subtotal = 0;
     let tax = 0;
@@ -43,8 +44,13 @@ export const createQuotation = async (req, res) => {
       discount,
       grandTotal,
       createdBy: req.user._id,
-      status: 'Pending Approval'
+      status: 'Pending Approval',
+      rfqId: rfqId || null,
+      timeline: timeline || null,
+      notes: notes || null
     });
+
+    await logActivity('Create', 'Quotation', quotation.id, req.user._id);
 
     res.status(201).json(quotation);
   } catch (error) {
@@ -95,19 +101,55 @@ export const approveRejectQuotation = async (req, res) => {
       return res.status(400).json({ message: 'Quotation is not in Pending Approval status' });
     }
 
-    quotation.status = action === 'Approve' ? 'Approved' : 'Rejected';
-    quotation.approvedBy = req.user._id;
-    quotation.remarks = remarks;
-    await quotation.save();
+    if (action === 'Approve') {
+      quotation.status = 'Converted to PO';
+      quotation.approvedBy = req.user._id;
+      quotation.remarks = remarks;
+      await quotation.save();
 
-    // Log approval action
-    await ApprovalLog.create({
-      entityType: 'Quotation',
-      entityId: quotation.id,
-      action,
-      remarks,
-      performedBy: req.user._id
-    });
+      // Auto-generate PO
+      const poNumber = await generatePONumber();
+      const po = await PurchaseOrder.create({
+        poNumber,
+        quotationId: quotation.id,
+        vendorId: quotation.vendorId,
+        lineItems: quotation.lineItems,
+        subtotal: quotation.subtotal,
+        tax: quotation.tax,
+        discount: quotation.discount,
+        grandTotal: quotation.grandTotal,
+        createdBy: quotation.createdBy,
+        status: 'Pending Approval'
+      });
+
+      // Log approval action
+      await ApprovalLog.create({
+        entityType: 'Quotation',
+        entityId: quotation.id,
+        action,
+        remarks,
+        performedBy: req.user._id
+      });
+
+      await logActivity(action, 'Quotation', quotation.id, req.user._id);
+      await logActivity('Create', 'PurchaseOrder', po.id, req.user._id);
+    } else {
+      quotation.status = 'Rejected';
+      quotation.approvedBy = req.user._id;
+      quotation.remarks = remarks;
+      await quotation.save();
+
+      // Log approval action
+      await ApprovalLog.create({
+        entityType: 'Quotation',
+        entityId: quotation.id,
+        action,
+        remarks,
+        performedBy: req.user._id
+      });
+
+      await logActivity(action, 'Quotation', quotation.id, req.user._id);
+    }
 
     res.json(quotation);
   } catch (error) {
@@ -142,7 +184,27 @@ export const convertToPO = async (req, res) => {
     quotation.status = 'Converted to PO';
     await quotation.save();
 
+    await logActivity('Create', 'PurchaseOrder', po.id, req.user._id);
+
     res.status(201).json(po);
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
+  }
+};
+
+export const getQuotationsByRFQ = async (req, res) => {
+  try {
+    const { rfqId } = req.params;
+    const quotations = await Quotation.findAll({
+      where: { rfqId },
+      include: [
+        { model: Vendor, as: 'vendor', attributes: ['vendorName'] },
+        { model: User, as: 'creator', attributes: ['name'] },
+        { model: User, as: 'approver', attributes: ['name'] }
+      ],
+      order: [['grandTotal', 'ASC']]
+    });
+    res.json(quotations);
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
   }

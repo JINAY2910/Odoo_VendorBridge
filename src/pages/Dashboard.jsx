@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth, api } from '../context/AuthContext.jsx';
-import { FileText, ShoppingCart, Receipt, CreditCard, Users, CheckCircle, XCircle, ArrowRight, BarChart3 } from 'lucide-react';
+import { FileText, ShoppingCart, Receipt, CreditCard, Users, CheckCircle, XCircle, ArrowRight, BarChart3, ClipboardList, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { formatCurrency } from '../utils/currency';
@@ -21,9 +21,9 @@ const StatCard = ({ title, value, icon: Icon, color }) =>
 const UserDashboard = ({ stats }) =>
   <div className="space-y-8">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard title="Total Quotations" value={stats.quotations || 0} icon={FileText} color="bg-blue-500" />
-      <StatCard title="Total Purchase Orders" value={stats.pos || 0} icon={ShoppingCart} color="bg-indigo-500" />
-      <StatCard title="Total Invoices" value={stats.invoices || 0} icon={Receipt} color="bg-green-500" />
+      <StatCard title="Total Vendors" value={stats.vendors || 0} icon={Users} color="bg-blue-500" />
+      <StatCard title="Total RFQs" value={stats.rfqs || 0} icon={ClipboardList} color="bg-indigo-500" />
+      <StatCard title="Total Activity Logs" value={stats.activityLogs || 0} icon={Activity} color="bg-green-500" />
       <StatCard title="Pending Payments" value={stats.pendingPayments || 0} icon={CreditCard} color="bg-orange-500" />
     </div>
 
@@ -91,11 +91,10 @@ const UserDashboard = ({ stats }) =>
 const ManagerDashboard = ({ stats, onApprove, onReject, onConvertToPO }) =>
   <div className="space-y-8">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard title="Pending Quotations" value={stats.pendingQuotations?.length || 0} icon={FileText} color="bg-orange-500" />
-      <StatCard title="Pending POs" value={stats.pendingPOs?.length || 0} icon={ShoppingCart} color="bg-blue-500" />
-      <StatCard title="Pending Payments" value={formatCurrency(stats.pendingPaymentAmount)} icon={CreditCard} color="bg-red-500" />
-      <StatCard title="Monthly Spending" value={formatCurrency(stats.monthlySpending)} icon={BarChart3} color="bg-green-500" />
-
+      <StatCard title="Total Vendors" value={stats.vendors || 0} icon={Users} color="bg-blue-500" />
+      <StatCard title="Total RFQs" value={stats.rfqs || 0} icon={ClipboardList} color="bg-indigo-500" />
+      <StatCard title="Total Activity Logs" value={stats.activityLogs || 0} icon={Activity} color="bg-green-500" />
+      <StatCard title="Monthly Spending" value={formatCurrency(stats.monthlySpending)} icon={BarChart3} color="bg-orange-500" />
     </div>
 
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -209,10 +208,9 @@ const ManagerDashboard = ({ stats, onApprove, onReject, onConvertToPO }) =>
 const AdminDashboard = ({ stats, onApprove, onReject, onConvertToPO }) =>
   <div className="space-y-8">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard title="Total Users" value={stats.users || 0} icon={Users} color="bg-blue-500" />
-      <StatCard title="Total Quotations" value={stats.quotations || 0} icon={FileText} color="bg-purple-500" />
-      <StatCard title="Total PO Value" value={formatCurrency(stats.poValue)} icon={ShoppingCart} color="bg-green-500" />
-
+      <StatCard title="Total Vendors" value={stats.vendors || 0} icon={Users} color="bg-blue-500" />
+      <StatCard title="Total RFQs" value={stats.rfqs || 0} icon={ClipboardList} color="bg-indigo-500" />
+      <StatCard title="Total Activity Logs" value={stats.activityLogs || 0} icon={Activity} color="bg-green-500" />
       <StatCard title="Pending Approvals" value={stats.pendingApprovals || 0} icon={CheckCircle} color="bg-orange-500" />
     </div>
     <ManagerDashboard stats={stats} onApprove={onApprove} onReject={onReject} onConvertToPO={onConvertToPO} />
@@ -231,13 +229,15 @@ const Dashboard = () => {
         return { data: [] };
       });
 
-      const [quo, inv, ven, pos, users, pay] = await Promise.all([
+      const [quo, inv, ven, pos, users, pay, rfqs, logCountRes] = await Promise.all([
         safeGet('/quotations'),
         safeGet('/invoices'),
         safeGet('/vendors'),
         safeGet('/pos'),
         safeGet('/users'),
-        safeGet('/payments')
+        safeGet('/payments'),
+        safeGet('/rfqs'),
+        safeGet('/activity-logs/count')
       ]);
 
       const currentMonth = new Date().getMonth();
@@ -265,6 +265,8 @@ const Dashboard = () => {
         pos: pos.data.length,
         invoices: inv.data.length,
         vendors: ven.data.length,
+        rfqs: rfqs.data.length,
+        activityLogs: logCountRes.data?.count || 0,
         users: users.data.length,
         pendingPayments: inv.data.filter((i) => i.status !== 'Paid').length,
         pendingPaymentAmount: pendingPaymentAmount,

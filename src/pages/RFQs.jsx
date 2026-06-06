@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../context/AuthContext.jsx';
-import { Plus, Search, Calendar, FileText, User, Users, X, ChevronRight, ChevronLeft, PlusCircle, Trash, Check, Eye } from 'lucide-react';
+import { Plus, Search, Calendar, FileText, User, Users, X, ChevronRight, ChevronLeft, PlusCircle, Trash, Check, Eye, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const RFQs = () => {
@@ -211,7 +212,13 @@ const RFQs = () => {
                         <span>{rfq.assignedVendors?.length || 0} vendors</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right space-x-1">
+                      <Link
+                        to={`/rfqs/${rfq.id || rfq._id}/compare`}
+                        className="p-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors inline-flex items-center cursor-pointer"
+                        title="Compare Bids">
+                        <FileSpreadsheet size={18} />
+                      </Link>
                       <button
                         onClick={() => setSelectedRfq(rfq)}
                         className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"

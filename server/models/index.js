@@ -7,8 +7,12 @@ import Invoice from './invoice.js';
 import Payment from './payment.js';
 import ApprovalLog from './approvalLog.js';
 import RFQ from './rfq.js';
+import ActivityLog from './ActivityLog.js';
 
 // Setup Associations
+
+// User associations
+User.belongsTo(Vendor, { as: 'vendor', foreignKey: 'vendorId' });
 
 // Vendor associations
 Vendor.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
@@ -43,6 +47,9 @@ Payment.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 // ApprovalLog associations
 ApprovalLog.belongsTo(User, { as: 'performer', foreignKey: 'performedBy' });
 
+// ActivityLog associations
+ActivityLog.belongsTo(User, { as: 'performer', foreignKey: 'performedBy' });
+
 export {
   User,
   Vendor,
@@ -52,5 +59,6 @@ export {
   Invoice,
   Payment,
   ApprovalLog,
-  RFQ
+  RFQ,
+  ActivityLog
 };
