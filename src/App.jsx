@@ -56,7 +56,7 @@ export default function App() {
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
             <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-            <Route path="/reset-password/:token" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
             
             {/* Procurement Staff / Admin Routes */}
             <Route element={<ProtectedRoute roles={['USER', 'MANAGER', 'ADMIN']} />}>

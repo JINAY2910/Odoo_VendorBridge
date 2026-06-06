@@ -8,6 +8,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [resetUrl, setResetUrl] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,9 +16,9 @@ const ForgotPassword = () => {
     try {
       const res = await api.post('/auth/forgot-password', { email });
       setSuccess(true);
-      // For local demo, we'll just show the link directly in toast (since we are not actually emailing)
       if (res.data.resetUrl) {
-        toast.info(`Demo Link generated (Check console).`, { autoClose: false });
+        setResetUrl(res.data.resetUrl);
+        toast.info(`Demo Link generated.`, { autoClose: false });
         console.log(`Demo Reset Link: ${res.data.resetUrl}`);
       }
     } catch (error) {
@@ -28,54 +29,59 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-
-      <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 w-full max-w-md rounded-3xl p-8 relative z-10 shadow-2xl">
-        <div className="mb-8">
-          <Link to="/login" className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-blue-400 mb-6 transition-colors">
-            <ArrowLeft size={14} className="mr-1" /> Back to Login
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-slate-200 overflow-hidden border border-slate-100">
+        <div className="p-8 bg-slate-900 text-white text-center relative">
+          <Link to="/login" className="absolute left-4 top-4 inline-flex items-center text-xs font-bold text-slate-400 hover:text-white transition-colors">
+            <ArrowLeft size={14} className="mr-1" /> Back
           </Link>
-          <h2 className="text-3xl font-display font-bold text-white mb-2">Forgot Password?</h2>
-          <p className="text-slate-400 text-sm">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
+          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/20">
+            <Mail size={32} />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Forgot Password?</h1>
+          <p className="text-slate-400 text-sm mt-1">Get a link to reset your password</p>
         </div>
 
         {success ? (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center space-y-4 animate-in fade-in slide-in-from-bottom-4">
-            <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle size={32} />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white mb-1">Check your email</h3>
-              <p className="text-sm text-slate-400">
-                We've sent a password reset link to <span className="text-slate-200 font-semibold">{email}</span>.
-                <br /><br />
-                <span className="text-xs text-amber-400/80 italic">(Demo: Check your terminal/console for the link)</span>
-              </p>
+          <div className="p-8 space-y-6">
+            <div className="bg-emerald-550/10 border border-emerald-200 rounded-2xl p-6 text-center space-y-4 bg-emerald-50">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md">
+                <CheckCircle size={32} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Check your email</h3>
+                <p className="text-sm text-slate-600">
+                  We've sent a password reset link to <span className="text-slate-900 font-semibold">{email}</span>.
+                </p>
+                {resetUrl && (
+                  <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2">
+                    <span className="text-xs text-amber-600 font-semibold block">Demo Mode Reset Link:</span>
+                    <a href={resetUrl} className="text-sm text-blue-600 hover:text-blue-500 font-semibold break-all underline block">
+                      {resetUrl}
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
             <button
-              onClick={() => { setSuccess(false); setEmail(''); }}
-              className="mt-2 text-sm font-bold text-emerald-400 hover:text-emerald-300">
+              onClick={() => { setSuccess(false); setEmail(''); setResetUrl(''); }}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all">
               Try another email
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Email Address</label>
+          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-slate-700 ml-1">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm"
-                  placeholder="Enter your registered email"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  placeholder="name@company.com"
                 />
               </div>
             </div>
@@ -83,11 +89,20 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading || !email}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]">
               {loading ? 'Sending Link...' : 'Send Reset Link'}
             </button>
           </form>
         )}
+
+        <div className="p-6 bg-slate-50 border-t border-slate-100 text-center">
+          <p className="text-sm text-slate-600">
+            Remembered your password?{' '}
+            <Link to="/login" className="text-blue-600 font-semibold hover:underline decoration-2 underline-offset-4">
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
