@@ -4,18 +4,15 @@ import axios from 'axios';
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-  // AUTH BYPASSED — mock admin user always logged in (re-enable later)
-  const [user, setUser] = useState({
-    _id: 'mock-admin-id',
-    name: 'Admin User',
-    email: 'admin@procurement.com',
-    role: 'ADMIN',
-    token: 'mock-token'
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('procurement_user');
+    return saved ? JSON.parse(saved) : null;
   });
   const [loading, setLoading] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { /* auth bypass active */ }, []);
+  useEffect(() => {
+    // Check if user token is still valid (could fetch /auth/me here if desired)
+  }, []);
 
   const login = (userData) => {
     setUser(userData);
@@ -59,11 +56,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // AUTH BYPASSED — 401 redirect disabled
-    // if (error.response && error.response.status === 401) {
-    //   localStorage.removeItem('procurement_user');
-    //   window.location.href = '/login';
-    // }
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('procurement_user');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

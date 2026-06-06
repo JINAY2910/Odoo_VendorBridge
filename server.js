@@ -17,6 +17,8 @@ import reportRoutes from './server/routes/reportRoutes.js';
 import pdfRoutes from './server/routes/pdfRoutes.js';
 import userRoutes from './server/routes/userRoutes.js';
 import productRoutes from './server/routes/productRoutes.js';
+import rfqRoutes from './server/routes/rfqRoutes.js';
+import activityLogRoutes from './server/routes/activityLogRoutes.js';
 
 
 dotenv.config();
@@ -51,6 +53,8 @@ async function startServer() {
   app.use('/api/pdf', pdfRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/products', productRoutes);
+  app.use('/api/rfqs', rfqRoutes);
+  app.use('/api/activity-logs', activityLogRoutes);
 
 
   app.get('/api/health', (req, res) => {

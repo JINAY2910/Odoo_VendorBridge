@@ -6,8 +6,13 @@ import PurchaseOrder from './purchaseOrder.js';
 import Invoice from './invoice.js';
 import Payment from './payment.js';
 import ApprovalLog from './approvalLog.js';
+import RFQ from './rfq.js';
+import ActivityLog from './ActivityLog.js';
 
 // Setup Associations
+
+// User associations
+User.belongsTo(Vendor, { as: 'vendor', foreignKey: 'vendorId' });
 
 // Vendor associations
 Vendor.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
@@ -15,7 +20,11 @@ Vendor.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 // Product associations
 Product.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 
+// RFQ associations
+RFQ.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
+
 // Quotation associations
+Quotation.belongsTo(RFQ, { as: 'rfq', foreignKey: 'rfqId' });
 Quotation.belongsTo(Vendor, { as: 'vendor', foreignKey: 'vendorId' });
 Quotation.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 Quotation.belongsTo(User, { as: 'approver', foreignKey: 'approvedBy' });
@@ -38,6 +47,9 @@ Payment.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 // ApprovalLog associations
 ApprovalLog.belongsTo(User, { as: 'performer', foreignKey: 'performedBy' });
 
+// ActivityLog associations
+ActivityLog.belongsTo(User, { as: 'performer', foreignKey: 'performedBy' });
+
 export {
   User,
   Vendor,
@@ -46,5 +58,7 @@ export {
   PurchaseOrder,
   Invoice,
   Payment,
-  ApprovalLog
+  ApprovalLog,
+  RFQ,
+  ActivityLog
 };

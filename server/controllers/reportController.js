@@ -1,4 +1,4 @@
-import { fn, col } from 'sequelize';
+import { fn, col, Op } from 'sequelize';
 import { Quotation, PurchaseOrder, Invoice, Vendor, Payment } from '../models/index.js';
 import { UserRole } from '../models/User.js';
 
@@ -90,6 +90,100 @@ export const getVendorSpending = async (req, res) => {
     }));
 
     res.json(formattedSpending);
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
+  }
+};
+
+export const getReportsSummary = async (req, res) => {
+  try {
+    const totalVendors = await Vendor.count();
+    const totalPOs = await PurchaseOrder.count();
+    const totalInvoiced = await Invoice.sum('grandTotal') || 0;
+
+    const pendingQuotations = await Quotation.count({ where: { status: 'Pending Approval' } });
+    const pendingPOs = await PurchaseOrder.count({ where: { status: 'Pending Approval' } });
+    const pendingApprovals = pendingQuotations + pendingPOs;
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const totalPOsThisMonth = await PurchaseOrder.count({
+      where: {
+        createdAt: { [Op.gte]: startOfMonth }
+      }
+    });
+
+    const totalInvoiceValue = totalInvoiced;
+
+    // Top 5 vendors by PO count (including totalSpent)
+    const topVendorsRaw = await PurchaseOrder.findAll({
+      attributes: [
+        'vendorId',
+        [fn('COUNT', col('PurchaseOrder.id')), 'poCount'],
+        [fn('SUM', col('grandTotal')), 'totalSpent']
+      ],
+      include: [{ model: Vendor, as: 'vendor', attributes: ['vendorName'] }],
+      group: ['vendorId', 'vendor.id'],
+      order: [[fn('SUM', col('grandTotal')), 'DESC']],
+      limit: 5
+    });
+
+    const topVendors = topVendorsRaw.map(v => ({
+      vendorName: v.vendor?.vendorName || `Vendor #${v.vendorId}`,
+      poCount: parseInt(v.getDataValue('poCount'), 10) || 0,
+      totalSpent: parseFloat(v.getDataValue('totalSpent')) || 0
+    }));
+
+    // Monthly Spend (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const monthlySpendRaw = await PurchaseOrder.findAll({
+      where: {
+        createdAt: { [Op.gte]: sixMonthsAgo }
+      },
+      attributes: [
+        [fn('YEAR', col('createdAt')), 'year'],
+        [fn('MONTH', col('createdAt')), 'monthNum'],
+        [fn('SUM', col('grandTotal')), 'totalSpent']
+      ],
+      group: [fn('YEAR', col('createdAt')), fn('MONTH', col('createdAt'))],
+      order: [
+        [fn('YEAR', col('createdAt')), 'ASC'],
+        [fn('MONTH', col('createdAt')), 'ASC']
+      ],
+      raw: true
+    });
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthlySpend = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthNum = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const name = monthNames[d.getMonth()];
+
+      const match = monthlySpendRaw.find(p => parseInt(p.monthNum, 10) === monthNum && parseInt(p.year, 10) === year);
+      monthlySpend.push({
+        month: `${name} ${year}`,
+        spend: match ? parseFloat(match.totalSpent || 0) : 0
+      });
+    }
+
+    res.json({
+      totalVendors,
+      totalPOs,
+      totalInvoiced,
+      pendingApprovals,
+      totalPOsThisMonth,
+      totalInvoiceValue,
+      topVendors,
+      monthlySpend
+    });
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
   }

@@ -1,5 +1,8 @@
 import { Invoice, PurchaseOrder, Vendor, User } from '../models/index.js';
 import { UserRole } from '../models/User.js';
+import { generateInvoicePDFBuffer } from '../utils/pdfHelper.js';
+import { sendInvoiceEmail } from '../utils/mailer.js';
+import { logActivity } from '../utils/activityLogger.js';
 
 // Auto-generate invoice number (e.g., INV-2026-0001)
 const generateInvoiceNumber = async () => {
@@ -59,6 +62,8 @@ export const createInvoice = async (req, res) => {
       status: 'Unpaid'
     });
 
+    await logActivity('Create', 'Invoice', invoice.id, req.user._id);
+
     res.status(201).json(invoice);
   } catch (error) {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
@@ -94,6 +99,30 @@ export const getInvoiceById = async (req, res) => {
     if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
     res.json(invoice);
   } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
+  }
+};
+
+export const sendInvoiceEmailController = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const id = req.params.id;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Recipient email is required' });
+    }
+
+    const invoice = await Invoice.findByPk(id);
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    const pdfBuffer = await generateInvoicePDFBuffer(id);
+    await sendInvoiceEmail(email, pdfBuffer, invoice.invoiceNumber);
+
+    res.json({ message: 'Invoice email sent successfully' });
+  } catch (error) {
+    console.error('Email invoice error:', error);
     res.status(500).json({ message: error instanceof Error ? error.message : 'Server error' });
   }
 };

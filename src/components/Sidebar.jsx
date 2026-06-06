@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, FileText, ShoppingCart, Receipt, CreditCard, UserCircle, LogOut, Settings, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, ShoppingCart, Receipt, CreditCard, UserCircle, LogOut, Settings, BarChart3, ClipboardList, Activity, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const Sidebar = () => {
@@ -14,15 +14,17 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['USER', 'MANAGER', 'ADMIN'] },
-  { name: 'Vendors', path: '/vendors', icon: Users, roles: ['USER', 'ADMIN'] },
-  { name: 'Quotations', path: '/quotations', icon: FileText, roles: ['USER', 'MANAGER', 'ADMIN'] },
-  { name: 'Purchase Orders', path: '/pos', icon: ShoppingCart, roles: ['USER', 'MANAGER', 'ADMIN'] },
-  { name: 'Invoices', path: '/invoices', icon: Receipt, roles: ['USER', 'MANAGER', 'ADMIN'] },
-  { name: 'Payments', path: '/payments', icon: CreditCard, roles: ['USER', 'MANAGER', 'ADMIN'] },
-  { name: 'Reports', path: '/reports', icon: BarChart3, roles: ['MANAGER', 'ADMIN'] },
-  { name: 'User Management', path: '/users', icon: Settings, roles: ['ADMIN'] },
-  { name: 'Profile', path: '/profile', icon: UserCircle, roles: ['USER', 'MANAGER', 'ADMIN'] }];
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'Vendors', path: '/vendors', icon: Users, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'RFQs', path: '/rfqs', icon: ClipboardList, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'Quotations', path: '/quotations', icon: FileText, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'Approvals', path: '/approvals', icon: CheckCircle, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'Purchase Orders', path: '/pos', icon: ShoppingCart, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'Invoices', path: '/invoices', icon: Receipt, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'Activity Logs', path: '/activity-logs', icon: Activity, roles: ['USER', 'MANAGER', 'ADMIN'] },
+    { name: 'Reports', path: '/reports', icon: BarChart3, roles: ['MANAGER', 'ADMIN'] }
+  ];
+
 
 
   const filteredItems = menuItems.filter((item) => user && item.roles.includes(user.role));

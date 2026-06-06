@@ -10,4 +10,4 @@ npm install
 npx puppeteer install
 
 # Build the frontend
-npm run build
+npm run vite-build
