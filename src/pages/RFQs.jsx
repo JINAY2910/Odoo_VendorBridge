@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../context/AuthContext.jsx';
 import { Plus, Search, Calendar, FileText, User, Users, X, ChevronRight, ChevronLeft, PlusCircle, Trash, Check, Eye, FileSpreadsheet, Paperclip } from 'lucide-react';
 import { toast } from 'react-toastify';
+import CustomSelect from '../components/CustomSelect.jsx';
 
 const RFQs = () => {
   const [rfqs, setRfqs] = useState([]);
@@ -399,16 +400,17 @@ const RFQs = () => {
                             placeholder="Qty" />
                         </div>
                         <div className="w-28">
-                          <select
+                          <CustomSelect
                             value={item.unit}
-                            onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none">
-                            <option value="Pcs">Pcs</option>
-                            <option value="Kg">Kg</option>
-                            <option value="Liters">Liters</option>
-                            <option value="Meters">Meters</option>
-                            <option value="Boxes">Boxes</option>
-                          </select>
+                            onChange={(val) => handleItemChange(index, 'unit', val)}
+                            options={[
+                              { value: 'Pcs', label: 'Pcs' },
+                              { value: 'Kg', label: 'Kg' },
+                              { value: 'Liters', label: 'Liters' },
+                              { value: 'Meters', label: 'Meters' },
+                              { value: 'Boxes', label: 'Boxes' }
+                            ]}
+                          />
                         </div>
                         <button
                           type="button"

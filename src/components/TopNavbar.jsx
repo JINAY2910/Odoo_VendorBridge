@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, FileText, ShoppingCart, Receipt, CreditCard, UserCircle, LogOut, Settings, BarChart3, Bell, Search } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, ShoppingCart, Receipt, CreditCard, UserCircle, LogOut, Settings, BarChart3, Bell, Search, ClipboardList } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const TopNavbar = () => {
@@ -16,6 +16,7 @@ const TopNavbar = () => {
   const menuItems = [
     { name: 'Overview', path: '/dashboard', icon: LayoutDashboard, roles: ['USER', 'MANAGER', 'ADMIN'] },
     { name: 'Vendors', path: '/vendors', icon: Users, roles: ['USER', 'ADMIN'] },
+    { name: 'RFQs', path: '/rfqs', icon: ClipboardList, roles: ['USER', 'MANAGER', 'ADMIN'] },
     { name: 'Quotations', path: '/quotations', icon: FileText, roles: ['USER', 'MANAGER', 'ADMIN'] },
     { name: 'POs', path: '/pos', icon: ShoppingCart, roles: ['USER', 'MANAGER', 'ADMIN'] },
     { name: 'Invoices', path: '/invoices', icon: Receipt, roles: ['USER', 'MANAGER', 'ADMIN'] },
