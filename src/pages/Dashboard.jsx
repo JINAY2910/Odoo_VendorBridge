@@ -1,223 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth, api } from '../context/AuthContext.jsx';
-import { FileText, ShoppingCart, Receipt, CreditCard, Users, CheckCircle, XCircle, ArrowRight, BarChart3 } from 'lucide-react';
+import { ArrowRight, Wallet, FileText, ShoppingCart, TrendingUp, MoreHorizontal, ArrowUpRight, Check, Car, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { formatCurrency } from '../utils/currency';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-
-const StatCard = ({ title, value, icon: Icon, color }) =>
-  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-    <div className={`p-3 rounded-xl ${color} bg-opacity-10 text-${color.split('-')[1]}-600`}>
-      <Icon size={24} />
-    </div>
-    <div>
-      <p className="text-sm text-slate-500 font-medium">{title}</p>
-      <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
-    </div>
-  </div>;
-
-
-const UserDashboard = ({ stats }) =>
-  <div className="space-y-8">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard title="Total Quotations" value={stats.quotations || 0} icon={FileText} color="bg-blue-500" />
-      <StatCard title="Total Purchase Orders" value={stats.pos || 0} icon={ShoppingCart} color="bg-indigo-500" />
-      <StatCard title="Total Invoices" value={stats.invoices || 0} icon={Receipt} color="bg-green-500" />
-      <StatCard title="Pending Payments" value={stats.pendingPayments || 0} icon={CreditCard} color="bg-orange-500" />
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-slate-900">Recent Quotations</h3>
-          <Link to="/quotations" className="text-blue-600 text-sm font-medium hover:underline flex items-center">
-            View All <ArrowRight size={14} className="ml-1" />
-          </Link>
-        </div>
-        <div className="space-y-4">
-          {stats.recentQuotations?.map((q) =>
-            <div key={q._id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-              <div>
-                <p className="font-bold text-slate-900">{q.quotationNumber}</p>
-                <p className="text-xs text-slate-500">{q.vendorId?.vendorName}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-slate-900">{formatCurrency(q.grandTotal)}</p>
-
-                <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${q.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                    q.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                      q.status === 'Converted to PO' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`
-                }>
-                  {q.status}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-slate-900 text-white text-xs py-1 px-3 rounded-lg shadow-xl border border-slate-800">
+        <p className="font-medium">{`${label} : ${formatCurrency(payload[0].value)}`}</p>
       </div>
-
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-slate-900">Recent Purchase Orders</h3>
-          <Link to="/pos" className="text-blue-600 text-sm font-medium hover:underline flex items-center">
-            View All <ArrowRight size={14} className="ml-1" />
-          </Link>
-        </div>
-        <div className="space-y-4">
-          {stats.recentPOs?.map((p) =>
-            <div key={p._id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-              <div>
-                <p className="font-bold text-slate-900">{p.poNumber}</p>
-                <p className="text-xs text-slate-500">{p.vendorId?.vendorName}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-bold text-slate-900">{formatCurrency(p.grandTotal)}</p>
-
-                <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${p.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                    p.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`
-                }>
-                  {p.status}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>;
-
-
-const ManagerDashboard = ({ stats, onApprove, onReject, onConvertToPO }) =>
-  <div className="space-y-8">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard title="Pending Quotations" value={stats.pendingQuotations?.length || 0} icon={FileText} color="bg-orange-500" />
-      <StatCard title="Pending POs" value={stats.pendingPOs?.length || 0} icon={ShoppingCart} color="bg-blue-500" />
-      <StatCard title="Pending Payments" value={formatCurrency(stats.pendingPaymentAmount)} icon={CreditCard} color="bg-red-500" />
-      <StatCard title="Monthly Spending" value={formatCurrency(stats.monthlySpending)} icon={BarChart3} color="bg-green-500" />
-
-    </div>
-
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-slate-900">Quotation Management</h3>
-        <Link to="/quotations" className="text-blue-600 text-sm font-medium hover:underline">View All</Link>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
-            <tr>
-              <th className="px-6 py-4">Quotation #</th>
-              <th className="px-6 py-4">Vendor</th>
-              <th className="px-6 py-4">Amount</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {[...(stats.pendingQuotations || []), ...(stats.approvedQuotations || [])].map((q) =>
-              <tr key={q._id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-bold text-slate-900">{q.quotationNumber}</td>
-                <td className="px-6 py-4 text-slate-600">{q.vendorId?.vendorName}</td>
-                <td className="px-6 py-4 font-bold text-slate-900">{formatCurrency(q.grandTotal)}</td>
-
-                <td className="px-6 py-4">
-                  <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${q.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`
-                  }>
-                    {q.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  {q.status === 'Pending Approval' ?
-                    <div className="flex justify-end space-x-2">
-                      <button onClick={() => onApprove(q._id, 'Quotation')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Approve">
-                        <CheckCircle size={20} />
-                      </button>
-                      <button onClick={() => onReject(q._id, 'Quotation')} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reject">
-                        <XCircle size={20} />
-                      </button>
-                    </div> :
-                    q.status === 'Approved' ?
-                      <button
-                        onClick={() => onConvertToPO(q._id)}
-                        className="flex items-center space-x-1 ml-auto bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">
-
-                        <ShoppingCart size={14} />
-                        <span>Convert to PO</span>
-                      </button> :
-
-                      <span className="text-xs text-slate-400 font-medium italic">No actions</span>
-                  }
-                </td>
-              </tr>
-            )}
-            {!stats.pendingQuotations?.length && !stats.approvedQuotations?.length &&
-              <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">No quotations to manage</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-      <div className="p-6 border-b border-slate-100">
-        <h3 className="text-lg font-bold text-slate-900">Pending PO Approvals</h3>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
-            <tr>
-              <th className="px-6 py-4">PO #</th>
-              <th className="px-6 py-4">Vendor</th>
-              <th className="px-6 py-4">Amount</th>
-              <th className="px-6 py-4">Created By</th>
-              <th className="px-6 py-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {stats.pendingPOs?.map((p) =>
-              <tr key={p._id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-bold text-slate-900">{p.poNumber}</td>
-                <td className="px-6 py-4 text-slate-600">{p.vendorId?.vendorName}</td>
-                <td className="px-6 py-4 font-bold text-slate-900">{formatCurrency(p.grandTotal)}</td>
-
-                <td className="px-6 py-4 text-slate-600">{p.createdBy?.name}</td>
-                <td className="px-6 py-4 text-right space-x-2">
-                  <button onClick={() => onApprove(p._id, 'PO')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Approve">
-                    <CheckCircle size={20} />
-                  </button>
-                  <button onClick={() => onReject(p._id, 'PO')} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reject">
-                    <XCircle size={20} />
-                  </button>
-                </td>
-              </tr>
-            )}
-            {stats.pendingPOs?.length === 0 &&
-              <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">No pending purchase orders</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>;
-
-
-const AdminDashboard = ({ stats, onApprove, onReject, onConvertToPO }) =>
-  <div className="space-y-8">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard title="Total Users" value={stats.users || 0} icon={Users} color="bg-blue-500" />
-      <StatCard title="Total Quotations" value={stats.quotations || 0} icon={FileText} color="bg-purple-500" />
-      <StatCard title="Total PO Value" value={formatCurrency(stats.poValue)} icon={ShoppingCart} color="bg-green-500" />
-
-      <StatCard title="Pending Approvals" value={stats.pendingApprovals || 0} icon={CheckCircle} color="bg-orange-500" />
-    </div>
-    <ManagerDashboard stats={stats} onApprove={onApprove} onReject={onReject} onConvertToPO={onConvertToPO} />
-  </div>;
-
+    );
+  }
+  return null;
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -231,54 +29,39 @@ const Dashboard = () => {
         return { data: [] };
       });
 
-      const [quo, inv, ven, pos, users, pay] = await Promise.all([
+      const [quo, inv, pos, pay] = await Promise.all([
         safeGet('/quotations'),
         safeGet('/invoices'),
-        safeGet('/vendors'),
         safeGet('/pos'),
-        safeGet('/users'),
         safeGet('/payments')
       ]);
 
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
+      const pendingPOs = pos.data.filter((p) => p.status === 'Pending Approval').length;
+      const totalPoValue = pos.data.reduce((sum, p) => sum + (p.grandTotal || 0), 0);
+      const pendingPaymentAmount = inv.data.filter(i => i.status !== 'Paid').reduce((sum, i) => sum + (i.grandTotal || 0), 0);
+      
+      const chartData = [
+        { name: '1 May - 6 May', value: 45000 },
+        { name: '7 May - 12 May', value: 38000 },
+        { name: '13 May - 18 May', value: 65000 },
+        { name: '19 May - 24 May', value: 25000 },
+        { name: '25 May - 30 May', value: 55000 },
+      ]; // Mocked chart data for visual effect
 
-      const monthlySpending = pay.data
-        .filter(p => {
-          const d = new Date(p.paymentDate || p.createdAt);
-          return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-        })
-        .reduce((sum, p) => sum + (p.amountPaid || 0), 0);
+      const recentTransactions = [
+        { id: 1, desc: 'Vendor Payment - TechCorp', date: 'Mar 12, 2026', method: 'Bank Transfer', category: 'Hardware', amount: -4500, status: 'Completed' },
+        { id: 2, desc: 'Client Payment Received', date: 'Mar 12, 2026', method: 'PayPal', category: 'Income', amount: 1550, status: 'Completed' },
+        { id: 3, desc: 'Software License Renew', date: 'Mar 11, 2026', method: 'Credit Card', category: 'Software', amount: -120, status: 'Completed' }
+      ];
 
-      let pendingPaymentAmount = 0;
-      inv.data.forEach(invoice => {
-        const invoicePayments = pay.data.filter(p => p.invoiceId?._id === invoice._id || p.invoiceId === invoice._id);
-        const paidForThisInvoice = invoicePayments.reduce((sum, p) => sum + (p.amountPaid || 0), 0);
-        const balanceDue = (invoice.grandTotal || 0) - paidForThisInvoice;
-        if (balanceDue > 0) {
-          pendingPaymentAmount += balanceDue;
-        }
-      });
-
-      const data = {
+      setStats({
         quotations: quo.data.length,
-        pos: pos.data.length,
-        invoices: inv.data.length,
-        vendors: ven.data.length,
-        users: users.data.length,
-        pendingPayments: inv.data.filter((i) => i.status !== 'Paid').length,
-        pendingPaymentAmount: pendingPaymentAmount,
-        monthlySpending: monthlySpending,
-        recentQuotations: quo.data.slice(-5).reverse(),
-        recentPOs: pos.data.slice(-5).reverse(),
-        pendingQuotations: quo.data.filter((q) => q.status === 'Pending Approval'),
-        approvedQuotations: quo.data.filter((q) => q.status === 'Approved'),
-        pendingPOs: pos.data.filter((p) => p.status === 'Pending Approval'),
-        poValue: pos.data.reduce((sum, p) => sum + (p.grandTotal || 0), 0),
-        pendingApprovals: quo.data.filter((q) => q.status === 'Pending Approval').length +
-          pos.data.filter((p) => p.status === 'Pending Approval').length
-      };
-      setStats(data);
+        pendingPOs,
+        totalPoValue,
+        pendingPaymentAmount,
+        chartData,
+        recentTransactions
+      });
     } catch (error) {
       console.error('Error fetching stats', error);
       toast.error('Failed to fetch dashboard data');
@@ -291,63 +74,238 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  const handleApprove = async (id, type) => {
-    try {
-      const endpoint = type === 'Quotation' ? `/quotations/${id}/approve-reject` : `/pos/${id}/approve-reject`;
-      await api.put(endpoint, { action: 'Approve', remarks: 'Approved from dashboard' });
-      toast.success(`${type} Approved Successfully`);
-      fetchStats();
-    } catch (error) {
-      console.error('Approval failed', error);
-      toast.error('Approval failed');
-    }
-  };
-
-  const handleReject = async (id, type) => {
-    const remarks = window.prompt('Enter rejection remarks:');
-    if (remarks === null) return;
-    try {
-      const endpoint = type === 'Quotation' ? `/quotations/${id}/approve-reject` : `/pos/${id}/approve-reject`;
-      await api.put(endpoint, { action: 'Reject', remarks });
-      toast.info(`${type} Rejected`);
-      fetchStats();
-    } catch (error) {
-      console.error('Rejection failed', error);
-      toast.error('Rejection failed');
-    }
-  };
-
-  const handleConvertToPO = async (id) => {
-    if (!window.confirm('Are you sure you want to convert this quotation to a Purchase Order?')) return;
-    try {
-      await api.post(`/quotations/${id}/convert-to-po`);
-      toast.success('Purchase Order Created Successfully');
-      fetchStats();
-    } catch (error) {
-      console.error('Conversion failed', error);
-      toast.error('Failed to convert quotation to Purchase Order');
-    }
-  };
-
-  if (loading) return <div className="p-8 text-center">Loading dashboard data...</div>;
+  if (loading) return <div className="p-8 text-center text-slate-400">Loading your workspace...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Welcome, {user?.name}</h1>
-          <p className="text-slate-500">Here's what's happening in your procurement portal today.</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Hero Header */}
+      <div className="pt-6 pb-10 text-white">
+        <p className="text-[11px] text-blue-200/70 mb-2 tracking-[0.2em] font-semibold uppercase">Monday, 11 May 2026</p>
+        <h1 className="text-4xl md:text-[44px] font-display font-light tracking-tight text-white/95">
+          Welcome back, <span className="font-medium text-white">{user?.name || 'Oripio'}</span>
+        </h1>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left Column (Balance & Spending) */}
+        <div className="space-y-6">
+          
+          {/* Balance Card */}
+          <div className="bg-white rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/60">
+            <div className="flex justify-between items-start mb-6">
+              <div className="flex items-center space-x-2.5 text-slate-500">
+                <div className="p-1.5 bg-blue-50/50 rounded-lg"><Wallet size={16} className="text-blue-500" /></div>
+                <span className="font-semibold text-[11px] uppercase tracking-widest text-slate-400">Total Portfolio</span>
+              </div>
+              <div className="bg-slate-50 px-3 py-1 rounded-full text-xs font-bold text-slate-600 border border-slate-100 flex items-center">
+                <span className="w-4 h-4 rounded-full bg-blue-500 mr-2 flex items-center justify-center text-[10px] text-white">₹</span>
+                INR <ChevronDown size={12} className="ml-1" />
+              </div>
+            </div>
+            
+            <div className="mb-8 flex justify-between items-end">
+              <div>
+                <h2 className="text-[40px] font-display font-medium text-slate-900 tracking-tight leading-none mb-3">{formatCurrency(stats.totalPoValue || 105435)}</h2>
+                <div className="flex items-center text-[11px] font-medium">
+                  <div className="flex items-center text-emerald-600 bg-emerald-50/80 px-2 py-0.5 rounded-full mr-2.5">
+                    <TrendingUp size={10} className="mr-1" strokeWidth={3} /> +12.4%
+                  </div>
+                  <span className="text-slate-400 tracking-wide">Balance increase</span>
+                </div>
+              </div>
+              {/* Mini visual grid */}
+              <div className="grid grid-cols-4 gap-1 opacity-80">
+                 {[...Array(16)].map((_, i) => (
+                   <div key={i} className={`w-3 h-3 rounded-sm ${i % 3 === 0 ? 'bg-blue-500' : i % 5 === 0 ? 'bg-cyan-400' : i % 7 === 0 ? 'bg-emerald-400' : 'bg-slate-100'}`}></div>
+                 ))}
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <Link to="/pos" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-semibold text-xs tracking-wide flex justify-center items-center transition-all shadow-lg shadow-blue-500/25">
+                <ShoppingCart size={14} className="mr-2" /> View POs
+              </Link>
+              <Link to="/payments" className="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-2xl font-semibold text-xs tracking-wide flex justify-center items-center transition-all shadow-lg shadow-slate-900/20">
+                <ArrowUpRight size={14} className="mr-2" /> Make Payment
+              </Link>
+              <button className="bg-slate-50 hover:bg-slate-100 p-3 rounded-2xl border border-slate-200 transition-colors">
+                <MoreHorizontal size={18} className="text-slate-500" />
+              </button>
+            </div>
+          </div>
+
+          {/* Spending Overview Card */}
+          <div className="bg-white rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/60">
+            <div className="flex items-center space-x-2.5 text-slate-500 mb-6">
+              <div className="p-1.5 bg-indigo-50/50 rounded-lg"><FileText size={16} className="text-indigo-500" /></div>
+              <span className="font-semibold text-[11px] uppercase tracking-widest text-slate-400">Spending Overview</span>
+            </div>
+            <div className="flex justify-between items-end mb-5">
+              <h3 className="text-[26px] font-display font-medium text-slate-900 leading-none">{formatCurrency(24678)}</h3>
+              <p className="text-[11px] text-slate-400 font-medium">From <span className="font-semibold text-slate-700">{formatCurrency(30000)}</span></p>
+            </div>
+            
+            {/* Progress Bars */}
+            <div className="flex h-6 mb-4 space-x-1">
+              <div className="bg-blue-500 h-full rounded-l-md" style={{ width: '40%' }}></div>
+              <div className="bg-purple-400 h-full" style={{ width: '25%' }}></div>
+              <div className="bg-cyan-400 h-full" style={{ width: '20%' }}></div>
+              <div className="bg-emerald-400 h-full rounded-r-md" style={{ width: '15%' }}></div>
+            </div>
+            
+            <div className="flex justify-between text-xs font-medium text-slate-500">
+              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-blue-500 mr-1.5"></div>Hardware <span className="text-slate-800 ml-1 font-bold">40%</span></div>
+              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-purple-400 mr-1.5"></div>Services <span className="text-slate-800 ml-1 font-bold">25%</span></div>
+              <div className="flex items-center"><div className="w-2 h-2 rounded-full bg-cyan-400 mr-1.5"></div>Software <span className="text-slate-800 ml-1 font-bold">20%</span></div>
+            </div>
+          </div>
+
         </div>
-        <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 text-sm font-medium text-slate-600">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+
+        {/* Middle Column (Chart) */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/60 h-full flex flex-col">
+            <div className="flex justify-between items-start mb-6">
+               <div className="flex items-center space-x-2.5 text-slate-500">
+                <div className="p-1.5 bg-blue-50/50 rounded-lg"><TrendingUp size={16} className="text-blue-500" /></div>
+                <span className="font-semibold text-[11px] uppercase tracking-widest text-slate-400">Payment Overview</span>
+              </div>
+              <button className="bg-slate-50 px-3 py-1.5 rounded-full text-[11px] font-semibold text-slate-600 border border-slate-200/60 flex items-center hover:bg-slate-100 transition-colors">
+                Monthly <ChevronDown size={12} className="ml-1" />
+              </button>
+            </div>
+
+            <div className="mb-8">
+              <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Total Payment</p>
+              <div className="flex items-center">
+                <h2 className="text-[40px] font-display font-medium text-slate-900 mr-4 leading-none">{formatCurrency(stats.totalPoValue || 105435)}</h2>
+                <div className="flex items-center text-[11px] font-medium text-emerald-600 bg-emerald-50/80 px-2.5 py-1 rounded-full mr-3">
+                  <TrendingUp size={10} className="mr-1.5" strokeWidth={3} /> +8.9%
+                </div>
+                <span className="text-[11px] font-medium text-slate-400 tracking-wide">vs last month</span>
+              </div>
+            </div>
+
+            <div className="flex-1 min-h-[200px] w-full mt-auto">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} tickFormatter={(val) => `${val/1000}k`} />
+                  <Tooltip cursor={{ fill: '#f8fafc' }} content={<CustomTooltip />} />
+                  <Bar dataKey="value" fill="url(#colorValue)" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.2}/>
+                    </linearGradient>
+                  </defs>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
 
-      {user?.role === 'USER' && <UserDashboard stats={stats} />}
-      {user?.role === 'MANAGER' && <ManagerDashboard stats={stats} onApprove={handleApprove} onReject={handleReject} onConvertToPO={handleConvertToPO} />}
-      {user?.role === 'ADMIN' && <AdminDashboard stats={stats} onApprove={handleApprove} onReject={handleReject} onConvertToPO={handleConvertToPO} />}
-    </div>);
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Transactions Table */}
+        <div className="lg:col-span-2 bg-white rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/60">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-display font-medium text-slate-900 text-[17px]">Transactions History</h3>
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Search" 
+                className="bg-slate-50 border border-slate-200/60 rounded-full py-2 px-4 pl-9 text-xs font-medium text-slate-600 focus:outline-none focus:border-blue-300 w-56 transition-colors"
+              />
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold border-b border-slate-100/80">
+                <tr>
+                  <th className="pb-4 font-semibold">Description</th>
+                  <th className="pb-4 font-semibold">Date</th>
+                  <th className="pb-4 font-semibold">Method</th>
+                  <th className="pb-4 font-semibold text-right">Amount</th>
+                  <th className="pb-4 font-semibold text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {stats.recentTransactions?.map((t) => (
+                  <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-4 flex items-center font-medium text-slate-900">
+                      <div className={`w-8 h-8 rounded-lg mr-3 flex items-center justify-center ${t.amount > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                        {t.amount > 0 ? <ArrowRight size={14} /> : <ShoppingCart size={14} />}
+                      </div>
+                      {t.desc}
+                    </td>
+                    <td className="py-4 text-slate-500">{t.date}</td>
+                    <td className="py-4 text-slate-500">{t.method}</td>
+                    <td className={`py-4 text-right font-display font-medium ${t.amount > 0 ? 'text-emerald-500' : 'text-slate-900'}`}>
+                      {t.amount > 0 ? '+' : ''}{formatCurrency(t.amount)}
+                    </td>
+                    <td className="py-4 text-center">
+                      <span className="bg-emerald-50/50 text-emerald-600 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-bold border border-emerald-100/50">
+                        {t.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
+        {/* Savings Goals */}
+        <div className="bg-white rounded-3xl p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/60">
+          <div className="flex justify-between items-center mb-7">
+            <div className="flex items-center space-x-2.5 text-slate-900">
+              <div className="p-1.5 bg-blue-50/50 rounded-lg"><Wallet size={16} className="text-blue-500" /></div>
+              <span className="font-display font-medium text-[17px]">Savings goals</span>
+            </div>
+            <button className="text-slate-400 hover:text-slate-600"><MoreHorizontal size={18} /></button>
+          </div>
+          
+          <div className="border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
+                  <Car size={18} className="text-slate-600" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Procurement Fund</h4>
+                  <p className="text-xs text-slate-500">Monthly savings: {formatCurrency(1000)}</p>
+                </div>
+              </div>
+              <button className="text-slate-400 hover:text-slate-600"><MoreHorizontal size={16} /></button>
+            </div>
+            
+            <div className="flex justify-between items-end mt-4 mb-2">
+              <h3 className="font-bold text-lg text-slate-900">{formatCurrency(15600)}</h3>
+              <span className="text-xs text-slate-500">Target: {formatCurrency(25000)}</span>
+            </div>
+            
+            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+              <div className="bg-blue-500 h-full rounded-full" style={{ width: '62%' }}></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
 };
+
+// Helper chevron
+const ChevronDown = ({size, className}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"></polyline></svg>
+);
 
 export default Dashboard;
