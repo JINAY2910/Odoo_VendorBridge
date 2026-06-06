@@ -39,14 +39,6 @@ const TopNavbar = () => {
 
         {/* Search & Actions */}
         <div className="flex items-center space-x-6">
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-            <input 
-              type="text" 
-              placeholder="Search by name, transactions" 
-              className="bg-slate-800/50 border border-slate-700/50 rounded-full py-1.5 pl-10 pr-4 text-[13px] font-medium text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-64 transition-all"
-            />
-          </div>
           <button className="text-slate-300 hover:text-white transition-colors relative">
             <Bell size={18} />
             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>

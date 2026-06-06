@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import CustomSelect from '../components/CustomSelect.jsx';
 import { api, useAuth } from '../context/AuthContext.jsx';
-import { ShoppingCart, CheckCircle, XCircle, ArrowRight, Receipt, FileText, Plus, Trash2, X, Search } from 'lucide-react';
+import { ShoppingCart, CheckCircle, XCircle, ArrowRight, Receipt, FileText, Plus, Trash2, X, Search, ChevronDown } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/currency';
@@ -211,72 +212,77 @@ const PurchaseOrders = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Vendor</label>
-            <select 
+            <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Vendor</label>
+            <CustomSelect 
               value={filters.vendorId}
-              onChange={(e) => setFilters({...filters, vendorId: e.target.value})}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Vendors</option>
-              {vendors.map(v => <option key={v._id} value={v._id}>{v.vendorName}</option>)}
-            </select>
+              onChange={(val) => setFilters({...filters, vendorId: val})}
+              options={[
+                { value: '', label: 'All Vendors' },
+                ...vendors.map(v => ({ value: v._id, label: v.vendorName }))
+              ]}
+              className="!py-1.5 !text-xs !bg-slate-50 !border-slate-200"
+            />
           </div>
 
           {(user?.role === 'MANAGER' || user?.role === 'ADMIN') && (
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Created By</label>
-              <select 
+              <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Created By</label>
+              <CustomSelect 
                 value={filters.createdBy}
-                onChange={(e) => setFilters({...filters, createdBy: e.target.value})}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">All Creators</option>
-                {uniqueCreators.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-              </select>
+                onChange={(val) => setFilters({...filters, createdBy: val})}
+                options={[
+                  { value: '', label: 'All Creators' },
+                  ...uniqueCreators.map(u => ({ value: u.id, label: u.name }))
+                ]}
+                className="!py-1.5 !text-xs !bg-slate-50 !border-slate-200"
+              />
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Status</label>
-            <select 
-              value={filters.status}
-              onChange={(e) => setFilters({...filters, status: e.target.value})}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Statuses</option>
-              <option value="Pending Approval">Pending Approval</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Closed">Closed</option>
-            </select>
+            <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Status</label>
+            <CustomSelect 
+                value={filters.status}
+                onChange={(val) => setFilters({...filters, status: val})}
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  { value: 'Pending Approval', label: 'Pending Approval' },
+                  { value: 'Approved', label: 'Approved' },
+                  { value: 'Rejected', label: 'Rejected' },
+                  { value: 'Closed', label: 'Closed' }
+                ]}
+                className="!py-1.5 !text-xs !bg-slate-50 !border-slate-200"
+              />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Date Range</label>
-            <select 
-              value={filters.dateRange}
-              onChange={(e) => setFilters({...filters, dateRange: e.target.value})}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="All Time">All Time</option>
-              <option value="Today">Today</option>
-              <option value="This Week">This Week</option>
-              <option value="This Month">This Month</option>
-            </select>
+            <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Date Range</label>
+            <CustomSelect 
+                value={filters.dateRange}
+                onChange={(val) => setFilters({...filters, dateRange: val})}
+                options={[
+                  { value: 'All Time', label: 'All Time' },
+                  { value: 'Today', label: 'Today' },
+                  { value: 'This Week', label: 'This Week' },
+                  { value: 'This Month', label: 'This Month' }
+                ]}
+                className="!py-1.5 !text-xs !bg-slate-50 !border-slate-200"
+              />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Amount Range</label>
-            <select 
-              value={filters.amountRange}
-              onChange={(e) => setFilters({...filters, amountRange: e.target.value})}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="All">All Amounts</option>
-              <option value="0-10000">₹0 - ₹10,000</option>
-              <option value="10000-50000">₹10,000 - ₹50,000</option>
-              <option value="50000+">₹50,000+</option>
-            </select>
+            <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Amount Range</label>
+            <CustomSelect 
+                value={filters.amountRange}
+                onChange={(val) => setFilters({...filters, amountRange: val})}
+                options={[
+                  { value: 'All', label: 'All Amounts' },
+                  { value: '0-10000', label: '₹0 - ₹10,000' },
+                  { value: '10000-50000', label: '₹10,000 - ₹50,000' },
+                  { value: '50000+', label: '₹50,000+' }
+                ]}
+                className="!py-1.5 !text-xs !bg-slate-50 !border-slate-200"
+              />
           </div>
         </div>
       </div>

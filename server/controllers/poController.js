@@ -49,7 +49,7 @@ export const getPOs = async (req, res) => {
   try {
     const pos = await PurchaseOrder.findAll({
       include: [
-        { model: Vendor, as: 'vendor', attributes: ['vendorName'] },
+        { model: Vendor, as: 'vendor', attributes: ['vendorName', 'category'] },
         { model: Quotation, as: 'quotation', attributes: ['quotationNumber'] },
         { model: User, as: 'creator', attributes: ['name'] },
         { model: User, as: 'approver', attributes: ['name'] }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../context/AuthContext.jsx';
 import { Plus, Search, MapPin, Phone, CreditCard, User, Edit, Trash2, Mail, X, Filter } from 'lucide-react';
 import { toast } from 'react-toastify';
+import CustomSelect from '../components/CustomSelect.jsx';
 
 const Vendors = () => {
   const [vendors, setVendors] = useState([]);
@@ -144,25 +145,33 @@ const Vendors = () => {
             <span>Filters:</span>
           </div>
 
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-            <option value="">All Categories</option>
-            <option value="IT">IT</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Services">Services</option>
-            <option value="Logistics">Logistics</option>
-          </select>
+          <div className="w-44 shrink-0">
+            <CustomSelect
+              value={categoryFilter}
+              onChange={(val) => setCategoryFilter(val)}
+              options={[
+                { value: '', label: 'All Categories' },
+                { value: 'IT', label: 'IT' },
+                { value: 'Manufacturing', label: 'Manufacturing' },
+                { value: 'Services', label: 'Services' },
+                { value: 'Logistics', label: 'Logistics' }
+              ]}
+              className="!py-1.5 !text-xs !bg-slate-50 !border-slate-200"
+            />
+          </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+          <div className="w-40 shrink-0">
+            <CustomSelect
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val)}
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' }
+              ]}
+              className="!py-1.5 !text-xs !bg-slate-50 !border-slate-200"
+            />
+          </div>
         </div>
       </div>
 
