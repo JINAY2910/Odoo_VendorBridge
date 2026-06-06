@@ -39,61 +39,60 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-
-      <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 w-full max-w-md rounded-3xl p-8 relative z-10 shadow-2xl">
-        <div className="mb-8">
-          <Link to="/login" className="inline-flex items-center text-xs font-bold text-slate-400 hover:text-blue-400 mb-6 transition-colors">
-            <ArrowLeft size={14} className="mr-1" /> Back to Login
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-slate-200 overflow-hidden border border-slate-100">
+        <div className="p-8 bg-slate-900 text-white text-center relative">
+          <Link to="/login" className="absolute left-4 top-4 inline-flex items-center text-xs font-bold text-slate-400 hover:text-white transition-colors">
+            <ArrowLeft size={14} className="mr-1" /> Back
           </Link>
-          <h2 className="text-3xl font-display font-bold text-white mb-2">Create New Password</h2>
-          <p className="text-slate-400 text-sm">
-            Please enter your new password below. Make sure it's secure!
-          </p>
+          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/20">
+            <Lock size={32} />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Reset Password</h1>
+          <p className="text-slate-400 text-sm mt-1">Please enter your new password below</p>
         </div>
 
         {success ? (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-6 text-center space-y-4 animate-in fade-in slide-in-from-bottom-4">
-            <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle size={32} />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white mb-1">Password Updated</h3>
-              <p className="text-sm text-slate-400">
-                Your password has been changed successfully. You will be redirected to the login page shortly.
-              </p>
+          <div className="p-8 space-y-6">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-4">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md">
+                <CheckCircle size={32} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Password Updated</h3>
+                <p className="text-sm text-slate-600">
+                  Your password has been changed successfully. You will be redirected to the login page shortly.
+                </p>
+              </div>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">New Password</label>
+          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-slate-700 ml-1">New Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                   placeholder="At least 6 characters"
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Confirm Password</label>
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-slate-700 ml-1">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                   placeholder="Repeat new password"
                 />
               </div>
@@ -102,7 +101,7 @@ const ResetPassword = () => {
             <button
               type="submit"
               disabled={loading || !password || !confirmPassword}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed mt-2">
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]">
               {loading ? 'Updating...' : 'Update Password'}
             </button>
           </form>
