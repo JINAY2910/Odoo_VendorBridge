@@ -6,16 +6,13 @@ VendorBridge is a unified full-stack Procurement and Vendor Management ERP built
 
 ## 🌟 Key Features
 
-- **Role-Based Access Control (RBAC):** Distinct dashboards and action permissions for **Admin**, **Manager / Approver**, **Procurement Officer**, and **Vendor** roles.
-- **Upgraded Dashboards:** Real-time visibility into metrics, spending category distribution (IT, Manufacturing, Services, Logistics), and interactive filters:
-  - **Currency Switcher:** Switch on the fly between **INR (₹)** and **USD ($)** with automated conversions.
-  - **Timeframe Selector:** Dynamically group payments by **Weekly**, **Monthly**, **Yearly**, or **All** periods.
-  - **Searchable Activity Logs:** Central timeline displaying recent audited events with a search filter.
-- **Vendor Portal:** Vendors log in and are redirected to a dedicated `/vendor-portal` to view active RFQs and submit/edit bids.
-- **Quotation Comparison:** Side-by-side bid reviews with automatic lowest price highlighting, rating indicators, and sorting options.
-- **E2E Procurement Workflow:** Automatic Purchase Order (PO) creation upon Quotation approval, manager PO approvals, invoice generation, and balance tracking.
-- **PDF Generation & Email Dispatch:** Dynamic PDF document creation using Puppeteer & EJS templates. Invoices can be downloaded locally, printed, or emailed directly via SMTP/Nodemailer.
-- **Reports & Analytics:** Spending analytics, top vendors charts, and exportable summary reports in CSV format.
+- **🔐 Role-Based Access Control:** Granular dashboard views and workflows for Admin, Manager, Officer, and Vendor roles.
+- **📊 Interactive Analytics:** Dashboards with INR/USD currency toggle, weekly/monthly chart filters, and searchable audit logs.
+- **🏪 Vendor Portal:** Dedicated vendor workspace for reviewing assigned RFQs and submitting/editing bid quotations.
+- **⚖️ Bid Comparison:** Side-by-side bid reviews with automatic lowest price highlighting and sorting options.
+- **⚙️ Automated Workflows:** Fully integrated pipeline from RFQ creation and quotation comparison to PO approvals and invoice generation.
+- **📄 PDFs & Notifications:** Dynamically compiled PDF documents (POs/invoices), local printing options, and Nodemailer email dispatch.
+- **📈 Spend Analytics:** Visual spend trends, top vendor analytics, and exportable CSV summary reports.
 
 ---
 
