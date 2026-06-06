@@ -166,9 +166,7 @@ const VendorPortal = () => {
       <header className="bg-slate-900 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Building size={20} />
-            </div>
+            <img src="/logo.png" alt="VendorBridge Logo" className="w-10 h-10 object-contain drop-shadow-md rounded-lg" />
             <div>
               <h1 className="text-lg font-bold tracking-tight">VendorBridge</h1>
               <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Supplier Portal</p>

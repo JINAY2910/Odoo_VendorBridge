@@ -32,11 +32,9 @@ const Register = () => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-slate-200 overflow-hidden border border-slate-100">
         <div className="p-8 bg-slate-900 text-white text-center">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/20">
-            <UserPlus size={32} />
-          </div>
+          <img src="/logo.png" alt="VendorBridge Logo" className="w-16 h-16 object-contain mx-auto mb-4 drop-shadow-lg rounded-xl" />
           <h1 className="text-2xl font-bold tracking-tight">Create Account</h1>
-          <p className="text-slate-400 text-sm mt-1">Join the Procurement MS Portal</p>
+          <p className="text-slate-400 text-sm mt-1">Join the VendorBridge Portal</p>
         </div>
         
         <form onSubmit={handleSubmit} className="p-8 space-y-5">

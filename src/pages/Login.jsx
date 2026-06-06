@@ -34,10 +34,8 @@ const Login = () => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-slate-200 overflow-hidden border border-slate-100">
         <div className="p-8 bg-slate-900 text-white text-center">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/20">
-            <LogIn size={32} />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Procurement MS</h1>
+          <img src="/logo.png" alt="VendorBridge Logo" className="w-16 h-16 object-contain mx-auto mb-4 drop-shadow-lg rounded-xl" />
+          <h1 className="text-2xl font-bold tracking-tight">VendorBridge</h1>
           <p className="text-slate-400 text-sm mt-1">Internal Workflow Management</p>
         </div>
         

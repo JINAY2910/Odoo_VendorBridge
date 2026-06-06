@@ -31,9 +31,7 @@ const TopNavbar = () => {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center transform rotate-45 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-            <span className="transform -rotate-45 font-display font-bold text-white tracking-tighter">VB</span>
-          </div>
+          <img src="/logo.png" alt="VendorBridge Logo" className="w-8 h-8 object-contain drop-shadow-md rounded-md" />
           <h1 className="text-xl font-display font-medium tracking-tight text-white">VendorBridge</h1>
         </div>
 
