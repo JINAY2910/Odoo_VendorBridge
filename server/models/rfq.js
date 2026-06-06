@@ -46,6 +46,11 @@ RFQ.init({
     type: DataTypes.STRING, // open/closed/awarded
     defaultValue: 'open'
   },
+  attachments: {
+    type: DataTypes.JSON, // array of base64 strings or URLs
+    allowNull: true,
+    defaultValue: []
+  },
   assignedVendors: {
     type: DataTypes.JSON, // array of vendor IDs
     allowNull: true,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../context/AuthContext.jsx';
-import { Plus, Search, Calendar, FileText, User, Users, X, ChevronRight, ChevronLeft, PlusCircle, Trash, Check, Eye, FileSpreadsheet } from 'lucide-react';
+import { Plus, Search, Calendar, FileText, User, Users, X, ChevronRight, ChevronLeft, PlusCircle, Trash, Check, Eye, FileSpreadsheet, Paperclip } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const RFQs = () => {
@@ -20,7 +20,8 @@ const RFQs = () => {
     description: '',
     deadline: '',
     items: [{ name: '', quantity: 1, unit: 'Pcs' }],
-    assignedVendors: []
+    assignedVendors: [],
+    attachments: []
   });
 
   const fetchRFQsAndVendors = async () => {
@@ -49,7 +50,8 @@ const RFQs = () => {
       description: '',
       deadline: '',
       items: [{ name: '', quantity: 1, unit: 'Pcs' }],
-      assignedVendors: []
+      assignedVendors: [],
+      attachments: []
     });
     setShowCreateModal(true);
   };
@@ -91,6 +93,32 @@ const RFQs = () => {
     const newItems = [...formData.items];
     newItems[index][field] = value;
     setFormData({ ...formData, items: newItems });
+  };
+
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    Promise.all(files.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve({ name: file.name, type: file.type, data: reader.result });
+        reader.onerror = error => reject(error);
+      });
+    })).then(base64Files => {
+      setFormData(prev => ({
+        ...prev,
+        attachments: [...(prev.attachments || []), ...base64Files]
+      }));
+    }).catch(error => {
+      toast.error('Error reading files');
+    });
+  };
+
+  const removeAttachment = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index)
+    }));
   };
 
   // Assigned Vendors Handlers
@@ -304,6 +332,33 @@ const RFQs = () => {
                         className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
                     </div>
                   </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700">Attachments (Optional)</label>
+                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl relative hover:bg-slate-50 transition-colors">
+                      <div className="space-y-1 text-center">
+                        <Paperclip className="mx-auto h-8 w-8 text-slate-400" />
+                        <div className="flex text-sm text-slate-600 justify-center">
+                          <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                            <span>Upload a file</span>
+                            <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileUpload} />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs text-slate-500">PDF, DOC, XLS up to 10MB</p>
+                      </div>
+                    </div>
+                    {formData.attachments?.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {formData.attachments.map((file, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                            <span className="text-xs font-medium text-slate-700 truncate mr-2 flex-1">{file.name}</span>
+                            <button type="button" onClick={() => removeAttachment(idx)} className="text-red-500 hover:text-red-700 cursor-pointer p-1"><X size={14}/></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -505,6 +560,26 @@ const RFQs = () => {
                   </table>
                 </div>
               </div>
+
+              {/* Attachments List */}
+              {selectedRfq.attachments?.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase">Attachments</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedRfq.attachments.map((file, idx) => (
+                      <a 
+                        key={idx} 
+                        href={file.data} 
+                        download={file.name}
+                        className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                      >
+                        <Paperclip size={12} />
+                        <span className="truncate max-w-[150px]">{file.name}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Assigned Vendors */}
               <div className="space-y-2">

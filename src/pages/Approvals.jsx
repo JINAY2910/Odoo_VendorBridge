@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api, useAuth } from '../context/AuthContext.jsx';
-import { FileText, ShoppingCart, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { FileText, ShoppingCart, CheckCircle, XCircle, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { formatCurrency } from '../utils/currency';
 
@@ -9,6 +9,11 @@ const Approvals = () => {
   const [pendingQuotes, setPendingQuotes] = useState([]);
   const [pendingPOs, setPendingPOs] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Timeline State
+  const [selectedEntity, setSelectedEntity] = useState(null); // { id, type, data }
+  const [timelineLogs, setTimelineLogs] = useState([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
 
   const fetchApprovals = async () => {
     try {
@@ -33,6 +38,24 @@ const Approvals = () => {
   useEffect(() => {
     fetchApprovals();
   }, []);
+
+  const fetchTimeline = async (entityId, entityType) => {
+    setTimelineLoading(true);
+    try {
+      const res = await api.get(`/approvals/${entityType}/${entityId}`);
+      setTimelineLogs(res.data);
+    } catch (error) {
+      toast.error('Failed to load timeline');
+    } finally {
+      setTimelineLoading(false);
+    }
+  };
+
+  const openTimeline = (item, type) => {
+    const id = item.id || item._id;
+    setSelectedEntity({ id, type, data: item });
+    fetchTimeline(id, type);
+  };
 
   const handleApprove = async (id, type) => {
     try {
@@ -128,6 +151,12 @@ const Approvals = () => {
                           title="Reject">
                           <XCircle size={20} />
                         </button>
+                        <button
+                          onClick={() => openTimeline(q, 'Quotation')}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          title="View Timeline">
+                          <Clock size={20} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -183,6 +212,12 @@ const Approvals = () => {
                           title="Reject">
                           <XCircle size={20} />
                         </button>
+                        <button
+                          onClick={() => openTimeline(p, 'PO')}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                          title="View Timeline">
+                          <Clock size={20} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -192,6 +227,68 @@ const Approvals = () => {
           </table>
         </div>
       </div>
+
+      {/* Timeline Modal */}
+      {selectedEntity && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden border border-slate-100 animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+            <div className="p-6 bg-slate-900 text-white flex items-center justify-between shrink-0">
+              <div>
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <CheckCircle size={20} className="text-blue-400" />
+                  Approval Timeline
+                </h2>
+                <p className="text-slate-400 text-xs mt-1">
+                  {selectedEntity.type} #{selectedEntity.data.quotationNumber || selectedEntity.data.poNumber}
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedEntity(null)}
+                className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+                <XCircle size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50">
+              {timelineLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : timelineLogs.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 italic">No approval history found.</div>
+              ) : (
+                <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                  {timelineLogs.map((log) => (
+                    <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-blue-100 text-blue-600 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
+                        {log.action === 'Approve' ? <CheckCircle size={16} className="text-green-600"/> : log.action === 'Reject' ? <XCircle size={16} className="text-red-600" /> : <Clock size={16}/>}
+                      </div>
+                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={`text-xs font-bold uppercase tracking-wider ${log.action === 'Approve' ? 'text-green-600' : log.action === 'Reject' ? 'text-red-600' : 'text-blue-600'}`}>
+                            {log.action}
+                          </span>
+                          <span className="text-[10px] font-medium text-slate-400">
+                            {new Date(log.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900 mb-1">
+                          {log.performer?.name || 'System'}
+                        </p>
+                        {log.remarks && (
+                          <p className="text-xs text-slate-500 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
+                            "{log.remarks}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

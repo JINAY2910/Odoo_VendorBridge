@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../context/AuthContext.jsx';
-import { Plus, Search, MapPin, Phone, CreditCard, User, Edit, Trash2, Mail, X, Filter } from 'lucide-react';
+import { Plus, Search, MapPin, Phone, CreditCard, User, Edit, Trash2, Mail, X, Filter, Star } from 'lucide-react';
 import { toast } from 'react-toastify';
 import CustomSelect from '../components/CustomSelect.jsx';
 
@@ -23,7 +23,8 @@ const Vendors = () => {
     gstNumber: '',
     category: 'Services',
     address: '',
-    status: 'active'
+    status: 'active',
+    rating: 0
   });
 
   const fetchVendors = async () => {
@@ -50,7 +51,8 @@ const Vendors = () => {
       gstNumber: '',
       category: 'Services',
       address: '',
-      status: 'active'
+      status: 'active',
+      rating: 0
     });
     setShowModal(true);
   };
@@ -64,7 +66,8 @@ const Vendors = () => {
       gstNumber: vendor.gstNumber || '',
       category: vendor.category || 'Services',
       address: vendor.address || '',
-      status: vendor.status || 'active'
+      status: vendor.status || 'active',
+      rating: vendor.rating || 0
     });
     setShowModal(true);
   };
@@ -184,6 +187,7 @@ const Vendors = () => {
                 <th className="px-6 py-4">Vendor Details</th>
                 <th className="px-6 py-4">Category</th>
                 <th className="px-6 py-4">GST Number</th>
+                <th className="px-6 py-4">Rating</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Address</th>
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -239,6 +243,12 @@ const Vendors = () => {
                     </td>
                     <td className="px-6 py-4 text-slate-600 font-mono text-sm">
                       {v.gstNumber}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-1 bg-amber-50 text-amber-600 px-2.5 py-1 rounded-lg w-max font-bold text-xs border border-amber-200/50">
+                        <Star size={12} fill="currentColor" />
+                        <span>{v.rating || '0.0'}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full ${
@@ -371,6 +381,22 @@ const Vendors = () => {
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700">Vendor Rating (0-5)</label>
+                  <div className="relative">
+                    <Star className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={formData.rating}
+                      onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) || 0 })}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                      placeholder="4.5" />
+                  </div>
                 </div>
               </div>
 

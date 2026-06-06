@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../context/AuthContext.jsx';
-import { ArrowLeft, ArrowUpDown, Clock, DollarSign, Award, CheckCircle, HelpCircle, FileSpreadsheet } from 'lucide-react';
+import { ArrowLeft, ArrowUpDown, Clock, DollarSign, Award, CheckCircle, HelpCircle, FileSpreadsheet, Star } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { formatCurrency } from '../utils/currency';
 
@@ -205,9 +205,15 @@ const QuotationComparison = () => {
 
                 <div className="p-6 border-b border-slate-100 bg-slate-50/50 space-y-1 pr-24">
                   <span className="text-xs font-bold font-mono text-slate-400">{q.quotationNumber}</span>
-                  <h3 className="font-bold text-slate-900 text-lg leading-tight">
-                    {q.vendorId?.vendorName || q.vendor?.vendorName || 'Unknown Vendor'}
-                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-bold text-slate-900 text-lg leading-tight">
+                      {q.vendorId?.vendorName || q.vendor?.vendorName || 'Unknown Vendor'}
+                    </h3>
+                    <div className="flex items-center space-x-0.5 bg-amber-50 text-amber-500 px-1.5 py-0.5 rounded text-[10px] font-bold border border-amber-200">
+                      <Star size={10} fill="currentColor" />
+                      <span>{q.vendorId?.rating || q.vendor?.rating || '0.0'}</span>
+                    </div>
+                  </div>
                   <div className="flex items-center space-x-1 text-xs text-slate-500">
                     <span>Submitted by {q.createdBy?.name || 'Vendor Portal'}</span>
                   </div>

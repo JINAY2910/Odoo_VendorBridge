@@ -19,6 +19,7 @@ import userRoutes from './server/routes/userRoutes.js';
 import productRoutes from './server/routes/productRoutes.js';
 import rfqRoutes from './server/routes/rfqRoutes.js';
 import activityLogRoutes from './server/routes/activityLogRoutes.js';
+import approvalRoutes from './server/routes/approvalRoutes.js';
 
 
 dotenv.config();
@@ -55,6 +56,7 @@ async function startServer() {
   app.use('/api/products', productRoutes);
   app.use('/api/rfqs', rfqRoutes);
   app.use('/api/activity-logs', activityLogRoutes);
+  app.use('/api/approvals', approvalRoutes);
 
 
   app.get('/api/health', (req, res) => {

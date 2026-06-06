@@ -55,23 +55,26 @@ const Dashboard = () => {
         return { data: [] };
       });
 
-      const [quo, inv, pos, pay, logs] = await Promise.all([
+      const [quo, inv, pos, pay, logs, rfqRes] = await Promise.all([
         safeGet('/quotations'),
         safeGet('/invoices'),
         safeGet('/pos'),
         safeGet('/payments'),
-        safeGet('/activity-logs?limit=10')
+        safeGet('/activity-logs?limit=10'),
+        safeGet('/rfqs')
       ]);
 
       const pendingPOs = pos.data.filter((p) => p.status === 'Pending Approval').length;
       const totalPoValue = pos.data.reduce((sum, p) => sum + (p.grandTotal || 0), 0);
       const pendingPaymentAmount = inv.data.filter(i => i.status !== 'Paid').reduce((sum, i) => sum + (i.grandTotal || 0), 0);
+      const activeRfqs = rfqRes.data.filter((r) => r.status === 'open').length;
 
       setStats({
         quotations: quo.data.length,
         pendingPOs,
         totalPoValue,
         pendingPaymentAmount,
+        activeRfqs,
         recentActivity: logs.data,
         payments: pay.data,
         invoices: inv.data,
@@ -612,6 +615,28 @@ const Dashboard = () => {
                   <span className="text-slate-400 font-medium text-[10px]">({logPct}%)</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Active RFQs Card */}
+          <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-7 shadow-lg shadow-blue-600/20 text-white relative overflow-hidden group">
+            {/* Background elements */}
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
+            <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-indigo-400/20 rounded-full blur-xl group-hover:scale-125 transition-transform duration-500"></div>
+            
+            <div className="relative z-10 flex items-center space-x-2.5 mb-6">
+              <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg"><FileText size={16} className="text-white" /></div>
+              <span className="font-semibold text-[11px] uppercase tracking-widest text-blue-100">Active RFQs</span>
+            </div>
+            
+            <div className="relative z-10 flex justify-between items-end mb-4">
+              <div>
+                <h3 className="text-[38px] font-display font-semibold text-white leading-none">{stats.activeRfqs || 0}</h3>
+                <span className="text-[11px] text-blue-200 uppercase tracking-wider font-bold block mt-2">Open Requests</span>
+              </div>
+              <Link to="/rfqs" className="bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center shadow-sm cursor-pointer">
+                View All <ArrowUpRight size={14} className="ml-1" />
+              </Link>
             </div>
           </div>
 

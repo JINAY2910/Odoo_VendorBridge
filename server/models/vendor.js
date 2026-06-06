@@ -70,6 +70,10 @@ Vendor.init({
     type: DataTypes.STRING,
     defaultValue: 'active'
   },
+  rating: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0.0
+  },
   createdBy: {
     type: DataTypes.INTEGER,
     allowNull: false

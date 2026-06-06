@@ -6,6 +6,8 @@ import { Layout, ProtectedRoute } from './components/Layout.jsx';
 
 // Pages
 import Login from './pages/Login.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Vendors from './pages/Vendors.jsx';
 import RFQs from './pages/RFQs.jsx';
@@ -53,6 +55,8 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+            <Route path="/reset-password/:token" element={<PublicRoute><ResetPassword /></PublicRoute>} />
             
             {/* Procurement Staff / Admin Routes */}
             <Route element={<ProtectedRoute roles={['USER', 'MANAGER', 'ADMIN']} />}>
