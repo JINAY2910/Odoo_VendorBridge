@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api, useAuth } from '../context/AuthContext.jsx';
-import { Plus, Search, Receipt, Trash2, DollarSign, FileText, Mail, X } from 'lucide-react';
+import { Plus, Search, Receipt, Trash2, DollarSign, FileText, Mail, X, Printer } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { formatCurrency } from '../utils/currency';
 import { downloadPDF } from '../utils/download';
@@ -133,6 +133,25 @@ const Invoices = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  const handlePrintInvoice = async (invoiceId) => {
+    try {
+      const response = await api.get(`/pdf/invoice/${invoiceId}`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = window.URL.createObjectURL(blob);
+      const printWindow = window.open(blobUrl, '_blank');
+      if (printWindow) {
+        printWindow.focus();
+      } else {
+        toast.warning('Popup blocked! Please allow popups to print.');
+      }
+    } catch (error) {
+      console.error('Print failed:', error);
+      toast.error('Failed to open PDF for printing');
     }
   };
 
@@ -361,6 +380,12 @@ const Invoices = () => {
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                           title="Download PDF">
                           <FileText size={18} />
+                        </button>
+                        <button
+                          onClick={() => handlePrintInvoice(i._id)}
+                          className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                          title="Print Invoice">
+                          <Printer size={18} />
                         </button>
                       </td>
                     </tr>
