@@ -1,6 +1,6 @@
 # 🌉 VendorBridge - Procurement & Vendor Management ERP
 
-VendorBridge is a unified, full-stack Procurement and Vendor Management ERP built on a modern SQL-based MERN-like stack (**MySQL**, **Sequelize ORM**, **Express.js**, **React**, and **Node.js**). This platform automates the entire organization-to-vendor lifecycle, from RFQ creation and quotation comparison to PO approvals, invoice dispatch, and payment tracking.
+VendorBridge is a unified full-stack Procurement and Vendor Management ERP built with MySQL, Express, React, and Node.js. It digitizes the procurement lifecycle, automating RFQs, quotation comparisons, PO approvals, invoicing, and payment logs.
 
 ---
 
@@ -118,4 +118,4 @@ Feel free to open an issue or submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](file:///Users/jinayshah/Desktop/Work👀/STUDY/Projects/Odoo_VendorBridge/LICENSE) file for details.
